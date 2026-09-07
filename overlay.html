@@ -33,20 +33,10 @@
 
         white-space: nowrap;
 
-        /*
-        THE ONE PAINT URL IS APPLIED TO
-        THE WHOLE TIMER.
-        */
-
         background-image: var(--paint);
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% 100%;
-
-        /*
-        THIS IS WHAT PREVENTS THE
-        RECTANGLE FROM SHOWING.
-        */
 
         -webkit-background-clip: text;
         background-clip: text;
@@ -72,16 +62,8 @@ const size = params.get("size") || "120";
 const timer = document.getElementById("timer");
 
 
-/* Timer size */
 timer.style.fontSize = size + "px";
 
-
-/*
-    ONE Paint URL.
-
-    It applies to the ENTIRE timer,
-    NOT individual digits.
-*/
 
 if (paint) {
     timer.style.setProperty(
@@ -91,7 +73,6 @@ if (paint) {
 }
 
 
-/* Convert starting time to seconds */
 
 function parseTime(value) {
 
@@ -118,7 +99,6 @@ let elapsed = parseTime(start);
 let lastTime = performance.now();
 
 
-/* Format timer */
 
 function formatTime(seconds) {
 
@@ -154,7 +134,6 @@ function formatTime(seconds) {
 }
 
 
-/* Run timer */
 
 function update() {
 
