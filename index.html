@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10 Minute Timer</title>
+    <title>test Timer</title>
 
 ```
 <style>
     html, body {
         margin: 0;
         padding: 0;
-        width: 100%;
-        height: 100%;
+        width: 85%;
+        height: 85%;
         background: transparent;
         overflow: hidden;
     }
@@ -39,10 +39,10 @@
 <body>
 
 ```
-<div id="timer">10:00</div>
+<div id="timer">00:00</div>
 
 <script>
-    let timeLeft = 600;
+    let timeLeft = 0;
 
     const timer = document.getElementById("timer");
 
@@ -55,15 +55,15 @@
             String(seconds).padStart(2, "0");
     }
 
-    function countdown() {
+    function countup() {
         if (timeLeft > 0) {
-            timeLeft--;
+            timeLeft++;
             updateTimer();
         }
     }
 
     updateTimer();
-    setInterval(countdown, 1000);
+    setInterval(countup, 1000);
 </script>
 ```
 
