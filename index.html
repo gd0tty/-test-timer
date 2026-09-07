@@ -1,280 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7TV Timer Generator</title>
 
-    <title>Twitch Timer</title>
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            overflow: hidden;
-        }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: #0d0d12;
+        color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 25px;
+    }
 
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .box {
+        width: 100%;
+        max-width: 650px;
+        background: #181820;
+        padding: 30px;
+        border-radius: 18px;
+        border: 1px solid #30303a;
+    }
 
-        /* 7TV PAINT */
-        #paint {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
-            z-index: 1;
-        }
+    h1 {
+        margin-top: 0;
+    }
 
-        /* TIMER */
-        #timer {
-            position: relative;
-            z-index: 2;
+    label {
+        display: block;
+        margin-top: 18px;
+        margin-bottom: 7px;
+        font-weight: bold;
+    }
 
-            font-family: Arial, sans-serif;
-            font-size: 100px;
-            font-weight: bold;
+    input {
+        width: 100%;
+        padding: 13px;
+        background: #0d0d12;
+        color: white;
+        border: 1px solid #383842;
+        border-radius: 8px;
+        font-size: 15px;
+    }
 
-            color: white;
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 20px;
+        border: 0;
+        border-radius: 8px;
+        background: #7657ff;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+    }
 
-            text-align: center;
+    button:hover {
+        opacity: .9;
+    }
 
-            text-shadow:
-                0 0 5px black,
-                0 0 10px black,
-                0 0 20px black;
-        }
-    </style>
+    .preview {
+        margin-top: 25px;
+        min-height: 180px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: repeating-conic-gradient(#222 0% 25%, #181818 0% 50%) 50% / 20px 20px;
+        border-radius: 12px;
+    }
+
+    #previewTimer {
+        font-size: 100px;
+        font-weight: bold;
+    }
+
+    .result {
+        display: none;
+        margin-top: 20px;
+    }
+</style>
 </head>
 
 <body>
 
-    <!-- YOUR 7TV PAINT -->
-    <img
-        id="paint"
-        src="https://cdn.7tv.app/paint/01JK6NVC5W6VS5D0KTJXF6SQRC/layer/01JK6NX4DTTXK1527D5PWZ38X9/4x.webp"
-        alt=""
+<div class="box">
+
+    <h1>🎨 7TV Timer Generator</h1>
+
+    <p>Put a 7TV Paint URL inside your timer text.</p>
+
+    <label>7TV Paint URL</label>
+
+    <input
+        id="paintUrl"
+        placeholder="https://cdn.7tv.app/paint/..."
     >
 
-    <!-- TIMER -->
-    <div id="timer">00:00</div>
+    <label>Starting Minutes</label>
 
+    <input
+        id="minutes"
+        type="number"
+        value="0"
+        min="0"
+    >
 
-    <script>
+    <label>Starting Seconds</label>
 
-        /*
-        ==========================================
-        TWITCH TIMER
-        ==========================================
-        */
+    <input
+        id="seconds"
+        type="number"
+        value="0"
+        min="0"
+        max="59"
+    >
 
-        let elapsedSeconds = 0;
-        let isPaused = false;
+    <label>Timer Size</label>
 
-        const timer = document.getElementById("timer");
+    <input
+        id="size"
+        type="number"
+        value="100"
+        min="20"
+        max="500"
+    >
 
+    <button onclick="generate()">
+        🔗 Generate OBS Timer
+    </button>
 
-        /*
-        ==========================================
-        DISPLAY TIMER
-        ==========================================
-        */
+    <div class="preview">
+        <div id="previewTimer">00:00</div>
+    </div>
 
-        function updateDisplay() {
+    <div class="result" id="result">
 
-            if (elapsedSeconds < 0) {
-                elapsedSeconds = 0;
-            }
+        <label>OBS Browser Source URL</label>
 
-            const minutes = Math.floor(elapsedSeconds / 60);
-            const seconds = elapsedSeconds % 60;
+        <input id="output" readonly>
 
-            timer.textContent =
-                String(minutes).padStart(2, "0") +
-                ":" +
-                String(seconds).padStart(2, "0");
-        }
+        <button onclick="copyURL()">
+            📋 Copy OBS URL
+        </button>
 
+    </div>
 
-        /*
-        ==========================================
-        COUNT UP
-        ==========================================
-        */
+</div>
 
-        setInterval(() => {
 
-            if (!isPaused) {
-                elapsedSeconds++;
-                updateDisplay();
-            }
+<script>
 
-        }, 1000);
+function generate() {
 
+    const paint =
+        document.getElementById("paintUrl").value.trim();
 
-        /*
-        ==========================================
-        PAUSE
-        ==========================================
-        */
+    const minutes =
+        Number(document.getElementById("minutes").value) || 0;
 
-        function pauseTimer() {
+    const seconds =
+        Number(document.getElementById("seconds").value) || 0;
 
-            isPaused = true;
+    const size =
+        Number(document.getElementById("size").value) || 100;
 
-            updateDisplay();
-        }
 
+    if (!paint) {
+        alert("Paste your 7TV Paint URL first!");
+        return;
+    }
 
-        /*
-        ==========================================
-        RESUME
-        ==========================================
-        */
 
-        function resumeTimer() {
+    const start =
+        (minutes * 60) + seconds;
 
-            isPaused = false;
 
-            updateDisplay();
-        }
+    const params = new URLSearchParams();
 
+    params.set("paint", paint);
+    params.set("start", start);
+    params.set("size", size);
 
-        /*
-        ==========================================
-        RESET
-        ==========================================
-        */
 
-        function resetTimer() {
+    const url =
+        new URL("overlay.html", window.location.href);
 
-            elapsedSeconds = 0;
-            isPaused = false;
+    url.search = params.toString();
 
-            updateDisplay();
-        }
 
+    document.getElementById("output").value =
+        url.href;
 
-        /*
-        ==========================================
-        ADD TIME
-        ==========================================
-        */
+    document.getElementById("result").style.display =
+        "block";
 
-        function addTime(seconds) {
 
-            seconds = Number(seconds);
+    updatePreview(paint, size);
+}
 
-            if (!isNaN(seconds)) {
-                elapsedSeconds += seconds;
-            }
 
-            updateDisplay();
-        }
+function updatePreview(paint, size) {
 
+    const timer =
+        document.getElementById("previewTimer");
 
-        /*
-        ==========================================
-        REMOVE TIME
-        ==========================================
-        */
 
-        function removeTime(seconds) {
+    /*
+       The Paint becomes the TEXT itself.
+       It is NOT displayed as a background box.
+    */
 
-            seconds = Number(seconds);
+    timer.style.fontSize = size + "px";
 
-            if (!isNaN(seconds)) {
-                elapsedSeconds -= seconds;
-            }
+    timer.style.backgroundImage =
+        `url("${paint}")`;
 
-            if (elapsedSeconds < 0) {
-                elapsedSeconds = 0;
-            }
+    timer.style.backgroundSize =
+        "cover";
 
-            updateDisplay();
-        }
+    timer.style.backgroundPosition =
+        "center";
 
+    timer.style.backgroundRepeat =
+        "no-repeat";
 
-        /*
-        ==========================================
-        SET TIME
-        ==========================================
-        */
+    timer.style.webkitBackgroundClip =
+        "text";
 
-        function setTime(time) {
+    timer.style.backgroundClip =
+        "text";
 
-            const parts = String(time).split(":");
+    timer.style.color =
+        "transparent";
 
-            if (parts.length === 2) {
+    timer.style.webkitTextFillColor =
+        "transparent";
+}
 
-                const minutes = parseInt(parts[0]);
-                const seconds = parseInt(parts[1]);
 
-                if (
-                    !isNaN(minutes) &&
-                    !isNaN(seconds)
-                ) {
+function copyURL() {
 
-                    elapsedSeconds =
-                        (minutes * 60) + seconds;
+    const output =
+        document.getElementById("output");
 
-                }
-            }
+    navigator.clipboard.writeText(output.value);
 
-            updateDisplay();
-        }
+    alert("Copied! 🔥");
+}
 
-
-        /*
-        ==========================================
-        BOT CONTROL API
-        ==========================================
-
-        The Twitch bot we'll create next will
-        eventually call these functions.
-
-        Examples:
-
-        pauseTimer()
-        resumeTimer()
-        resetTimer()
-        addTime(30)
-        removeTime(30)
-        setTime("10:00")
-        */
-
-        window.timerControls = {
-
-            pause: pauseTimer,
-
-            resume: resumeTimer,
-
-            reset: resetTimer,
-
-            add: addTime,
-
-            remove: removeTime,
-
-            set: setTime
-
-        };
-
-
-        /*
-        ==========================================
-        START
-        ==========================================
-        */
-
-        updateDisplay();
-
-    </script>
+</script>
 
 </body>
 </html>
