@@ -1,261 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>7TV Timer Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer Generator</title>
 
-<style>
-    * {
-        box-sizing: border-box;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-        margin: 0;
-        min-height: 100vh;
-        background: #0d0d12;
-        color: white;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 25px;
-    }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #111;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
 
-    .box {
-        width: 100%;
-        max-width: 650px;
-        background: #181820;
-        padding: 30px;
-        border-radius: 18px;
-        border: 1px solid #30303a;
-    }
+        .box {
+            width: 450px;
+            padding: 30px;
+            border-radius: 18px;
+            background: #1c1c1c;
+            box-shadow: 0 10px 40px rgba(0,0,0,.4);
+        }
 
-    h1 {
-        margin-top: 0;
-    }
+        h1 {
+            margin-top: 0;
+            text-align: center;
+        }
 
-    label {
-        display: block;
-        margin-top: 18px;
-        margin-bottom: 7px;
-        font-weight: bold;
-    }
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
 
-    input {
-        width: 100%;
-        padding: 13px;
-        background: #0d0d12;
-        color: white;
-        border: 1px solid #383842;
-        border-radius: 8px;
-        font-size: 15px;
-    }
+        input {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #2b2b2b;
+            color: white;
+            outline: none;
+        }
 
-    button {
-        width: 100%;
-        padding: 14px;
-        margin-top: 20px;
-        border: 0;
-        border-radius: 8px;
-        background: #7657ff;
-        color: white;
-        font-weight: bold;
-        font-size: 16px;
-        cursor: pointer;
-    }
+        button {
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #9147ff;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-    button:hover {
-        opacity: .9;
-    }
+        button:hover {
+            background: #772ce8;
+        }
 
-    .preview {
-        margin-top: 25px;
-        min-height: 180px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: repeating-conic-gradient(#222 0% 25%, #181818 0% 50%) 50% / 20px 20px;
-        border-radius: 12px;
-    }
+        #result {
+            display: none;
+            margin-top: 20px;
+        }
 
-    #previewTimer {
-        font-size: 100px;
-        font-weight: bold;
-    }
+        #generatedLink {
+            margin-top: 8px;
+            word-break: break-all;
+            padding: 12px;
+            border-radius: 8px;
+            background: #111;
+            font-size: 13px;
+        }
 
-    .result {
-        display: none;
-        margin-top: 20px;
-    }
-</style>
+        .copy {
+            background: #333;
+            margin-top: 10px;
+        }
+
+        .copy:hover {
+            background: #444;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="box">
 
-    <h1>🎨 7TV Timer Generator</h1>
-
-    <p>Put a 7TV Paint URL inside your timer text.</p>
+    <h1>Timer Generator</h1>
 
     <label>7TV Paint URL</label>
-
     <input
         id="paintUrl"
-        placeholder="https://cdn.7tv.app/paint/..."
+        type="text"
+        placeholder="Paste your 7TV Paint URL here"
     >
 
-    <label>Starting Minutes</label>
-
+    <label>Starting Time</label>
     <input
-        id="minutes"
-        type="number"
-        value="0"
-        min="0"
-    >
-
-    <label>Starting Seconds</label>
-
-    <input
-        id="seconds"
-        type="number"
-        value="0"
-        min="0"
-        max="59"
+        id="startTime"
+        type="text"
+        value="00:00"
+        placeholder="00:00"
     >
 
     <label>Timer Size</label>
-
     <input
-        id="size"
+        id="fontSize"
         type="number"
-        value="100"
+        value="120"
         min="20"
-        max="500"
+        max="1000"
     >
 
-    <button onclick="generate()">
-        🔗 Generate OBS Timer
-    </button>
+    <button onclick="generate()">Generate Timer</button>
 
-    <div class="preview">
-        <div id="previewTimer">00:00</div>
-    </div>
+    <div id="result">
 
-    <div class="result" id="result">
+        <strong>Your OBS Browser Source URL:</strong>
 
-        <label>OBS Browser Source URL</label>
+        <div id="generatedLink"></div>
 
-        <input id="output" readonly>
-
-        <button onclick="copyURL()">
-            📋 Copy OBS URL
+        <button class="copy" onclick="copyLink()">
+            Copy OBS URL
         </button>
 
     </div>
 
 </div>
 
-
 <script>
 
 function generate() {
 
-    const paint =
-        document.getElementById("paintUrl").value.trim();
+    const paintUrl = document.getElementById("paintUrl").value.trim();
+    const startTime = document.getElementById("startTime").value.trim();
+    const fontSize = document.getElementById("fontSize").value;
 
-    const minutes =
-        Number(document.getElementById("minutes").value) || 0;
-
-    const seconds =
-        Number(document.getElementById("seconds").value) || 0;
-
-    const size =
-        Number(document.getElementById("size").value) || 100;
-
-
-    if (!paint) {
-        alert("Paste your 7TV Paint URL first!");
+    if (!paintUrl) {
+        alert("Paste a 7TV Paint URL first.");
         return;
     }
 
+    const baseUrl = new URL("overlay.html", window.location.href);
 
-    const start =
-        (minutes * 60) + seconds;
+    baseUrl.searchParams.set("paint", paintUrl);
+    baseUrl.searchParams.set("start", startTime || "00:00");
+    baseUrl.searchParams.set("size", fontSize);
 
+    const finalUrl = baseUrl.toString();
 
-    const params = new URLSearchParams();
-
-    params.set("paint", paint);
-    params.set("start", start);
-    params.set("size", size);
-
-
-    const url =
-        new URL("overlay.html", window.location.href);
-
-    url.search = params.toString();
-
-
-    document.getElementById("output").value =
-        url.href;
-
-    document.getElementById("result").style.display =
-        "block";
-
-
-    updatePreview(paint, size);
+    document.getElementById("generatedLink").textContent = finalUrl;
+    document.getElementById("result").style.display = "block";
 }
 
+function copyLink() {
 
-function updatePreview(paint, size) {
+    const link = document.getElementById("generatedLink").textContent;
 
-    const timer =
-        document.getElementById("previewTimer");
+    navigator.clipboard.writeText(link);
 
-
-    /*
-       The Paint becomes the TEXT itself.
-       It is NOT displayed as a background box.
-    */
-
-    timer.style.fontSize = size + "px";
-
-    timer.style.backgroundImage =
-        `url("${paint}")`;
-
-    timer.style.backgroundSize =
-        "cover";
-
-    timer.style.backgroundPosition =
-        "center";
-
-    timer.style.backgroundRepeat =
-        "no-repeat";
-
-    timer.style.webkitBackgroundClip =
-        "text";
-
-    timer.style.backgroundClip =
-        "text";
-
-    timer.style.color =
-        "transparent";
-
-    timer.style.webkitTextFillColor =
-        "transparent";
-}
-
-
-function copyURL() {
-
-    const output =
-        document.getElementById("output");
-
-    navigator.clipboard.writeText(output.value);
-
-    alert("Copied! 🔥");
+    alert("OBS URL copied!");
 }
 
 </script>
