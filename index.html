@@ -1,48 +1,34 @@
 <!DOCTYPE html>
-
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>test Timer</title>
+    <title>Timer</title>
 
-```
-<style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 85%;
-        height: 85%;
-        background: transparent;
-        overflow: hidden;
-    }
+    <style>
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+        }
 
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #timer {
-        font-family: Arial, sans-serif;
-        font-size: 100px;
-        font-weight: bold;
-        color: white;
-        text-align: center;
-        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-</style>
-```
-
+        #timer {
+            font-family: Arial, sans-serif;
+            font-size: 100px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
 
-```
-<div id="timer">00:00</div>
+    <div id="timer">00:00</div>
 
-<script>
-    let timeLeft = 0;
+    <script>
+        let timeLeft = 0;
 
     const timer = document.getElementById("timer");
 
@@ -56,16 +42,13 @@
     }
 
     function countup() {
-        if (timeLeft > 0) {
-            timeLeft++;
-            updateTimer();
-        }
+        timeLeft++;
+        updateTimer();
     }
 
     updateTimer();
     setInterval(countup, 1000);
-</script>
-```
+    </script>
 
 </body>
 </html>
