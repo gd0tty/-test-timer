@@ -1,602 +1,1105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Timer Generator</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            min-height: 100%;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            font-family: Arial, Helvetica, sans-serif;
-            color: white;
-
-            background:
-                radial-gradient(
-                    circle at 20% 20%,
-                    rgba(0, 195, 255, 0.30),
-                    transparent 35%
-                ),
-                radial-gradient(
-                    circle at 80% 80%,
-                    rgba(0, 110, 255, 0.25),
-                    transparent 35%
-                ),
-                linear-gradient(
-                    135deg,
-                    #06131f,
-                    #08263a,
-                    #04121e
-                );
-
-            overflow-x: hidden;
-        }
-
-
-        body::before {
-            content: "";
-            position: fixed;
-
-            width: 500px;
-            height: 500px;
-
-            border-radius: 50%;
-
-            background: rgba(0, 200, 255, 0.12);
-
-            filter: blur(100px);
-
-            top: -200px;
-            left: -150px;
-
-            animation: floatGlow 7s ease-in-out infinite alternate;
-
-            pointer-events: none;
-        }
-
-
-        body::after {
-            content: "";
-
-            position: fixed;
-
-            width: 450px;
-            height: 450px;
-
-            border-radius: 50%;
-
-            background: rgba(0, 120, 255, 0.12);
-
-            filter: blur(100px);
-
-            bottom: -200px;
-            right: -150px;
-
-            animation: floatGlow2 8s ease-in-out infinite alternate;
-
-            pointer-events: none;
-        }
-
-
-        @keyframes floatGlow {
-            from {
-                transform: translate(0, 0);
-            }
-
-            to {
-                transform: translate(100px, 80px);
-            }
-        }
-
-
-        @keyframes floatGlow2 {
-            from {
-                transform: translate(0, 0);
-            }
-
-            to {
-                transform: translate(-100px, -80px);
-            }
-        }
-
-
-        .box {
-            position: relative;
-
-            width: min(500px, calc(100% - 30px));
-
-            padding: 35px;
-
-            border-radius: 24px;
-
-            background: rgba(8, 30, 45, 0.78);
-
-            border: 1px solid rgba(100, 220, 255, 0.25);
-
-            backdrop-filter: blur(20px);
-
-            box-shadow:
-                0 0 30px rgba(0, 190, 255, 0.12),
-                0 25px 70px rgba(0, 0, 0, 0.45);
-
-            overflow: hidden;
-        }
-
-
-        .box::before {
-            content: "";
-
-            position: absolute;
-
-            top: 0;
-            left: 10%;
-
-            width: 80%;
-            height: 2px;
-
-            background: linear-gradient(
-                90deg,
-                transparent,
-                #00d9ff,
-                #6ee7ff,
-                #00aaff,
-                transparent
-            );
-
-            box-shadow:
-                0 0 15px #00cfff,
-                0 0 35px #00aaff;
-        }
-
-
-        h1 {
-            margin: 0 0 30px;
-
-            text-align: center;
-
-            font-size: 32px;
-
-            letter-spacing: -1px;
-
-            background: linear-gradient(
-                90deg,
-                #ffffff,
-                #7eeeff,
-                #ffffff
-            );
-
-            -webkit-background-clip: text;
-            background-clip: text;
-
-            color: transparent;
-
-            text-shadow:
-                0 0 25px rgba(0, 210, 255, 0.35);
-        }
-
-
-        .subtitle {
-            text-align: center;
-
-            margin-top: -20px;
-            margin-bottom: 28px;
-
-            color: #9bdced;
-
-            font-size: 14px;
-        }
-
-
-        label {
-            display: block;
-
-            margin-top: 20px;
-            margin-bottom: 8px;
-
-            color: #c9f7ff;
-
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-
-        input {
-            width: 100%;
-
-            padding: 15px 16px;
-
-            border-radius: 12px;
-
-            border: 1px solid rgba(120, 220, 255, 0.15);
-
-            outline: none;
-
-            background: rgba(1, 15, 25, 0.75);
-
-            color: white;
-
-            font-size: 14px;
-
-            transition: 0.25s;
-        }
-
-
-        input::placeholder {
-            color: #6c8b98;
-        }
-
-
-        input:focus {
-            border-color: #00d9ff;
-
-            box-shadow:
-                0 0 0 3px rgba(0, 210, 255, 0.10),
-                0 0 20px rgba(0, 210, 255, 0.15);
-
-            background: rgba(2, 20, 32, 0.9);
-        }
-
-
-        .generate {
-            position: relative;
-
-            width: 100%;
-
-            margin-top: 28px;
-
-            padding: 16px;
-
-            border: none;
-            border-radius: 12px;
-
-            cursor: pointer;
-
-            color: white;
-
-            font-size: 16px;
-            font-weight: 800;
-
-            background: linear-gradient(
-                90deg,
-                #00aaff,
-                #00d9ff,
-                #008cff
-            );
-
-            box-shadow:
-                0 0 20px rgba(0, 200, 255, 0.35),
-                0 8px 25px rgba(0, 140, 255, 0.25);
-
-            transition:
-                transform 0.2s,
-                box-shadow 0.2s;
-        }
-
-
-        .generate:hover {
-            transform: translateY(-2px);
-
-            box-shadow:
-                0 0 30px rgba(0, 220, 255, 0.55),
-                0 12px 35px rgba(0, 140, 255, 0.35);
-        }
-
-
-        .generate:active {
-            transform: translateY(0);
-        }
-
-
-        /* Result */
-
-        #result {
-            display: none;
-
-            margin-top: 25px;
-
-            padding-top: 22px;
-
-            border-top: 1px solid rgba(120, 220, 255, 0.12);
-        }
-
-
-        .result-title {
-            display: block;
-
-            margin-bottom: 9px;
-
-            color: #bff5ff;
-
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-
-        #generatedLink {
-            padding: 14px;
-
-            border-radius: 12px;
-
-            background: rgba(1, 12, 20, 0.85);
-
-            border: 1px solid rgba(80, 200, 255, 0.12);
-
-            color: #91eaff;
-
-            font-size: 12px;
-
-            line-height: 1.5;
-
-            word-break: break-all;
-
-            box-shadow:
-                inset 0 0 20px rgba(0, 150, 255, 0.04);
-        }
-
-
-        .copy {
-            width: 100%;
-
-            margin-top: 10px;
-
-            padding: 14px;
-
-            border: 1px solid rgba(100, 220, 255, 0.2);
-
-            border-radius: 12px;
-
-            background: rgba(20, 70, 90, 0.65);
-
-            color: #d8faff;
-
-            font-size: 14px;
-            font-weight: bold;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-
-        .copy:hover {
-            background: rgba(0, 150, 200, 0.35);
-
-            border-color: #00d9ff;
-
-            box-shadow:
-                0 0 20px rgba(0, 210, 255, 0.18);
-        }
-
-
-        .status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            gap: 7px;
-
-            margin-top: 22px;
-
-            color: #79cddd;
-
-            font-size: 12px;
-        }
-
-
-        .dot {
-            width: 7px;
-            height: 7px;
-
-            border-radius: 50%;
-
-            background: #00e1ff;
-
-            box-shadow:
-                0 0 10px #00e1ff;
-
-            animation: pulse 1.5s infinite;
-        }
-
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 0.5;
-                transform: scale(0.8);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1.15);
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TimerForge — OBS Timer Generator</title>
+
+<style>
+:root {
+    --blue: #19c8ff;
+    --blue2: #4ee4ff;
+    --deep: #061522;
+    --deep2: #0a2236;
+    --panel: rgba(10, 32, 52, .72);
+    --border: rgba(88, 218, 255, .22);
+    --text: #f4fcff;
+    --muted: #8bb5c8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, Arial, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 15% 10%, rgba(25, 200, 255, .18), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(78, 228, 255, .12), transparent 28%),
+        linear-gradient(135deg, #04101b, #071a2c 50%, #04101b);
+    overflow-x: hidden;
+}
+
+/* BACKGROUND */
+
+.background-glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: rgba(25, 200, 255, .08);
+    filter: blur(100px);
+    pointer-events: none;
+    animation: floatGlow 8s ease-in-out infinite alternate;
+}
+
+.glow-one {
+    top: -250px;
+    left: -200px;
+}
+
+.glow-two {
+    right: -250px;
+    bottom: -250px;
+    animation-delay: 2s;
+}
+
+@keyframes floatGlow {
+    from {
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        transform: translateY(40px) scale(1.15);
+    }
+}
+
+.particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .25;
+    background-image:
+        radial-gradient(circle, rgba(255,255,255,.7) 1px, transparent 1px);
+    background-size: 55px 55px;
+    animation: moveParticles 25s linear infinite;
+}
+
+@keyframes moveParticles {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 250px 250px;
+    }
+}
+
+/* MAIN */
+
+.container {
+    width: min(1180px, calc(100% - 40px));
+    margin: auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* NAV */
+
+nav {
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -.5px;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+    background: linear-gradient(135deg, var(--blue), var(--blue2));
+    color: #001522;
+    box-shadow: 0 0 30px rgba(25,200,255,.35);
+}
+
+.logo span {
+    color: var(--blue2);
+}
+
+.nav-badge {
+    border: 1px solid var(--border);
+    background: rgba(10, 35, 55, .55);
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* HERO */
+
+.hero {
+    text-align: center;
+    padding: 55px 0 45px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    border: 1px solid rgba(78,228,255,.25);
+    background: rgba(25,200,255,.08);
+    color: var(--blue2);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #47ff9c;
+    box-shadow: 0 0 12px #47ff9c;
+}
+
+.hero h1 {
+    margin: 22px auto 14px;
+    max-width: 850px;
+    font-size: clamp(44px, 7vw, 78px);
+    line-height: .98;
+    letter-spacing: -4px;
+}
+
+.gradient {
+    background: linear-gradient(
+        90deg,
+        #ffffff,
+        var(--blue2),
+        var(--blue)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.hero p {
+    max-width: 620px;
+    margin: auto;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+/* PANELS */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    padding-bottom: 70px;
+}
+
+.panel {
+    position: relative;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    backdrop-filter: blur(25px);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.25),
+        inset 0 1px rgba(255,255,255,.04);
+    overflow: hidden;
+}
+
+.panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--blue),
+        transparent
+    );
+    opacity: .7;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.panel-title {
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.panel-subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.step {
+    font-size: 11px;
+    color: var(--blue2);
+    border: 1px solid var(--border);
+    padding: 7px 10px;
+    border-radius: 9px;
+}
+
+/* INPUTS */
+
+.field {
+    margin-bottom: 19px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: #b8d8e6;
+    font-weight: 800;
+}
+
+.input {
+    width: 100%;
+    height: 50px;
+    border-radius: 13px;
+    border: 1px solid rgba(139,181,200,.18);
+    background: rgba(2, 13, 23, .65);
+    color: white;
+    outline: none;
+    padding: 0 15px;
+    font-size: 14px;
+    transition: .2s;
+}
+
+.input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(25,200,255,.08);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+}
+
+/* BUTTON */
+
+.generate {
+    width: 100%;
+    height: 56px;
+    border: 0;
+    border-radius: 15px;
+    color: #001522;
+    font-weight: 950;
+    font-size: 15px;
+    cursor: pointer;
+    background: linear-gradient(
+        90deg,
+        var(--blue),
+        var(--blue2),
+        var(--blue)
+    );
+    background-size: 200% 100%;
+    box-shadow: 0 10px 35px rgba(25,200,255,.22);
+    transition: .2s;
+    animation: buttonFlow 3s linear infinite;
+}
+
+.generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 45px rgba(25,200,255,.32);
+}
+
+.generate:active {
+    transform: translateY(1px);
+}
+
+@keyframes buttonFlow {
+    from {
+        background-position: 0% 50%;
+    }
+
+    to {
+        background-position: 200% 50%;
+    }
+}
+
+/* PREVIEW */
+
+.preview-box {
+    min-height: 350px;
+    border-radius: 18px;
+    border: 1px solid rgba(139,181,200,.13);
+    background:
+        linear-gradient(
+            45deg,
+            rgba(255,255,255,.025) 25%,
+            transparent 25%,
+            transparent 75%,
+            rgba(255,255,255,.025) 75%
+        );
+    background-size: 28px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.preview-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 18px;
+}
+
+.preview-timer {
+    font-size: 86px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -5px;
+    color: white;
+    text-shadow:
+        0 0 25px rgba(25,200,255,.35);
+    transition: .2s;
+}
+
+.preview-font {
+    margin-top: 25px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* RESULT */
+
+.result {
+    display: none;
+    margin-top: 18px;
+    animation: resultIn .4s ease;
+}
+
+@keyframes resultIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-box {
+    padding: 15px;
+    border-radius: 14px;
+    background: rgba(25,200,255,.06);
+    border: 1px solid rgba(25,200,255,.2);
+}
+
+.result-label {
+    color: var(--blue2);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.generated-link {
+    color: #dff9ff;
+    font-size: 12px;
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+.copy {
+    margin-top: 12px;
+    width: 100%;
+    height: 43px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: rgba(25,200,255,.08);
+    color: var(--blue2);
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.copy:hover {
+    background: rgba(25,200,255,.15);
+}
+
+/* INFO */
+
+.info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.info-card {
+    padding: 14px;
+    border-radius: 13px;
+    border: 1px solid rgba(139,181,200,.12);
+    background: rgba(255,255,255,.02);
+}
+
+.info-card strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.info-card span {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+/* FOOTER */
+
+footer {
+    text-align: center;
+    padding: 0 0 35px;
+    color: #5f8497;
+    font-size: 11px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        letter-spacing: -2px;
+    }
+
+    .info {
+        grid-template-columns: 1fr;
+    }
+
+    nav {
+        height: 75px;
+    }
+
+    .nav-badge {
+        display: none;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .container {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .panel {
+        padding: 20px;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-timer {
+        font-size: 60px;
+    }
+}
+</style>
 </head>
-
 
 <body>
 
-<div class="box">
+<div class="background-glow glow-one"></div>
+<div class="background-glow glow-two"></div>
+<div class="particles"></div>
 
-    <h1>Timer Generator</h1>
+<div class="container">
 
-    <div class="subtitle">
-        Create your custom OBS timer overlay
-    </div>
+    <nav>
 
+        <div class="logo">
+            <div class="logo-icon">⏱</div>
 
-    <label>7TV Paint URL</label>
+            <div>
+                Timer<span>Forge</span>
+            </div>
+        </div>
 
-    <input
-        id="paintUrl"
-        type="text"
-        placeholder="Paste your 7TV Paint URL..."
-    >
+        <div class="nav-badge">
+            OBS Overlay Generator
+        </div>
 
-
-    <label>Starting Time</label>
-
-    <input
-        id="startTime"
-        type="text"
-        value="00:00"
-        placeholder="00:00"
-    >
+    </nav>
 
 
-    <label>Timer Size</label>
+    <section class="hero">
 
-    <input
-        id="fontSize"
-        type="number"
-        value="120"
-        min="20"
-        max="1000"
-    >
+        <div class="badge">
+            <span class="badge-dot"></span>
+            Generator Online
+        </div>
 
+        <h1>
+            Build your
+            <span class="gradient">
+                perfect timer.
+            </span>
+        </h1>
 
-    <button
-        class="generate"
-        onclick="generate()"
-    >
-        ✨ Generate Timer
-    </button>
+        <p>
+            Create a custom OBS timer overlay with
+            any 7TV Paint and almost any Google Font.
+            One URL. One timer.
+        </p>
 
-
-    <div id="result">
-
-        <span class="result-title">
-            Your OBS Browser Source URL
-        </span>
-
-        <div id="generatedLink"></div>
-
-        <button
-            class="copy"
-            onclick="copyLink()"
-        >
-            📋 Copy OBS URL
-        </button>
-
-    </div>
+    </section>
 
 
-    <div class="status">
-        <span class="dot"></span>
-        Timer system online
-    </div>
+    <section class="grid">
+
+
+        <!-- SETTINGS -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <div class="panel-title">
+                        Timer Settings
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Configure your overlay
+                    </div>
+                </div>
+
+                <div class="step">
+                    STEP 01
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    7TV Paint URL
+                </label>
+
+                <input
+                    class="input"
+                    id="paintUrl"
+                    type="text"
+                    placeholder="Paste your 7TV Paint URL..."
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Google Font
+                </label>
+
+                <input
+                    class="input"
+                    id="fontName"
+                    type="text"
+                    value="Roboto"
+                    placeholder="Example: Bebas Neue"
+                >
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="field">
+
+                    <label>
+                        Starting Time
+                    </label>
+
+                    <input
+                        class="input"
+                        id="startTime"
+                        type="text"
+                        value="00:00"
+                        placeholder="00:00"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Font Size
+                    </label>
+
+                    <input
+                        class="input"
+                        id="fontSize"
+                        type="number"
+                        value="120"
+                        min="20"
+                        max="500"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="generate"
+                onclick="generateTimer()"
+            >
+                ✦ Generate OBS Timer
+            </button>
+
+
+            <div
+                class="result"
+                id="result"
+            >
+
+                <div class="result-box">
+
+                    <div class="result-label">
+                        Your OBS Browser Source URL
+                    </div>
+
+                    <div
+                        class="generated-link"
+                        id="generatedLink"
+                    ></div>
+
+
+                    <button
+                        class="copy"
+                        onclick="copyURL()"
+                        id="copyButton"
+                    >
+                        Copy OBS URL
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="info">
+
+                <div class="info-card">
+
+                    <strong>7TV Paint</strong>
+
+                    <span>
+                        One Paint URL for the whole timer
+                    </span>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <strong>Google Fonts</strong>
+
+                    <span>
+                        Choose your font by name
+                    </span>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <strong>OBS Ready</strong>
+
+                    <span>
+                        Paste the generated URL
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PREVIEW -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <div class="panel-title">
+                        Live Preview
+                    </div>
+
+                    <div class="panel-subtitle">
+                        See your timer before adding it to OBS
+                    </div>
+                </div>
+
+                <div class="step">
+                    LIVE
+                </div>
+
+            </div>
+
+
+            <div class="preview-box">
+
+                <div class="preview-label">
+                    Timer Preview
+                </div>
+
+                <div
+                    class="preview-timer"
+                    id="previewTimer"
+                >
+                    00:00
+                </div>
+
+                <div
+                    class="preview-font"
+                    id="previewFont"
+                >
+                    Font: Roboto
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+        TimerForge • Built for OBS
+    </footer>
 
 </div>
 
 
 <script>
 
-function generate() {
+/* =========================================
+   LIVE PREVIEW
+   ========================================= */
 
-    const paintUrl =
+let previewSeconds = 0;
+
+const previewTimer =
+    document.getElementById("previewTimer");
+
+const fontInput =
+    document.getElementById("fontName");
+
+const sizeInput =
+    document.getElementById("fontSize");
+
+const previewFont =
+    document.getElementById("previewFont");
+
+
+function formatTime(seconds) {
+
+    seconds = Math.floor(seconds);
+
+    const hours =
+        Math.floor(seconds / 3600);
+
+    const minutes =
+        Math.floor((seconds % 3600) / 60);
+
+    const secs =
+        seconds % 60;
+
+
+    if (hours > 0) {
+
+        return (
+            String(hours).padStart(2, "0") +
+            ":" +
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(secs).padStart(2, "0")
+        );
+
+    }
+
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+    );
+}
+
+
+setInterval(function() {
+
+    previewSeconds++;
+
+    previewTimer.textContent =
+        formatTime(previewSeconds);
+
+}, 1000);
+
+
+/* =========================================
+   LIVE FONT PREVIEW
+   ========================================= */
+
+function updatePreviewFont() {
+
+    const font =
+        fontInput.value.trim() || "Roboto";
+
+    const encoded =
+        font.replace(/\s+/g, "+");
+
+
+    const link =
+        document.getElementById("previewGoogleFont");
+
+
+    if (link) {
+        link.remove();
+    }
+
+
+    const fontLink =
+        document.createElement("link");
+
+    fontLink.id =
+        "previewGoogleFont";
+
+    fontLink.rel =
+        "stylesheet";
+
+    fontLink.href =
+        "https://fonts.googleapis.com/css2?family=" +
+        encoded +
+        ":wght@100;200;300;400;500;600;700;800;900&display=swap";
+
+    document.head.appendChild(fontLink);
+
+
+    previewTimer.style.fontFamily =
+        `"${font}", sans-serif`;
+
+
+    previewFont.textContent =
+        "Font: " + font;
+}
+
+
+fontInput.addEventListener(
+    "input",
+    updatePreviewFont
+);
+
+
+sizeInput.addEventListener(
+    "input",
+    function() {
+
+        const size =
+            Number(sizeInput.value) || 120;
+
+        previewTimer.style.fontSize =
+            Math.min(size * .72, 120) + "px";
+
+    }
+);
+
+
+updatePreviewFont();
+
+
+
+/* =========================================
+   GENERATE OBS URL
+   ========================================= */
+
+function generateTimer() {
+
+    const paint =
         document.getElementById("paintUrl")
         .value
         .trim();
 
-    const startTime =
+
+    const start =
         document.getElementById("startTime")
         .value
-        .trim();
+        .trim() || "00:00";
 
-    const fontSize =
+
+    const size =
         document.getElementById("fontSize")
-        .value;
+        .value || "120";
 
 
-    if (!paintUrl) {
+    const font =
+        document.getElementById("fontName")
+        .value
+        .trim() || "Roboto";
 
-        alert("Paste a 7TV Paint URL first.");
+
+    if (!paint) {
+
+        alert(
+            "Paste your 7TV Paint URL first."
+        );
 
         return;
     }
 
 
-    const overlayUrl =
+    /*
+        Automatically create the
+        overlay.html URL based on
+        the current GitHub Pages site.
+    */
+
+    const overlay =
         new URL(
             "overlay.html",
             window.location.href
         );
 
 
-    overlayUrl.searchParams.set(
+    overlay.searchParams.set(
         "paint",
-        paintUrl
+        paint
     );
 
 
-    overlayUrl.searchParams.set(
+    overlay.searchParams.set(
         "start",
-        startTime || "00:00"
+        start
     );
 
 
-    overlayUrl.searchParams.set(
+    overlay.searchParams.set(
         "size",
-        fontSize
+        size
     );
 
 
-    overlayUrl.searchParams.set(
+    overlay.searchParams.set(
+        "font",
+        font
+    );
+
+
+    /*
+        Cache buster.
+
+        Every generated URL gets a
+        new version number so OBS
+        doesn't keep an old overlay.
+    */
+
+    overlay.searchParams.set(
         "v",
-        Date.now().toString()
+        Date.now()
     );
+
+
+    const finalURL =
+        overlay.toString();
 
 
     document.getElementById(
         "generatedLink"
     ).textContent =
-        overlayUrl.toString();
+        finalURL;
 
 
     document.getElementById(
         "result"
-    ).style.display = "block";
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "copyButton"
+    ).textContent =
+        "Copy OBS URL";
 }
 
 
-function copyLink() {
 
-    const link =
+/* =========================================
+   COPY
+   ========================================= */
+
+function copyURL() {
+
+    const url =
         document.getElementById(
             "generatedLink"
         ).textContent;
 
 
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(url);
 
 
     const button =
-        document.querySelector(".copy");
+        document.getElementById(
+            "copyButton"
+        );
 
 
-    button.textContent = "✓ Copied!";
+    button.textContent =
+        "✓ Copied!";
 
 
-    setTimeout(() => {
+    setTimeout(function() {
 
         button.textContent =
-            "📋 Copy OBS URL";
+            "Copy OBS URL";
 
-    }, 1500);
+    }, 1800);
+
 }
 
 </script>
