@@ -1,240 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
+<title>Timer Overlay</title>
 
-    <meta charset="UTF-8">
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+    }
 
-    <title>Timer Overlay</title>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-    <style>
+    #timer {
+        display: inline-block;
+        position: relative;
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            overflow: hidden;
-        }
+        font-family: Arial, sans-serif;
+        font-weight: 900;
+        font-size: 120px;
+        line-height: 1;
 
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /*
-            THIS IS THE ENTIRE TIMER.
-
-            The Paint is positioned over this whole object,
-            NOT separately over each digit.
-        */
-
-        #timer {
-            position: relative;
-            display: inline-block;
-
-            font-family: Arial, sans-serif;
-            font-weight: 900;
-            font-size: 120px;
-            line-height: 1;
-
-            color: white;
-
-            white-space: nowrap;
-        }
+        white-space: nowrap;
 
         /*
-            The ONE Paint image.
-
-            It covers the entire timer as one object.
+        The Paint is applied to the ENTIRE timer.
         */
-
-        #paint {
-            position: absolute;
-
-            left: 0;
-            top: 0;
-
-            width: 100%;
-            height: 100%;
-
-            object-fit: fill;
-
-            pointer-events: none;
-
-            z-index: 2;
-        }
+        background-image: var(--paint);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        background-position: center;
 
         /*
-            Timer text stays underneath the Paint.
+        Makes the Paint visible ONLY through the timer text.
+        No rectangle.
         */
+        -webkit-background-clip: text;
+        background-clip: text;
 
-        #time {
-            position: relative;
-            z-index: 1;
-        }
-
-    </style>
-
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
 </head>
 
 <body>
 
-    <div id="timer">
-
-        <span id="time">00:00</span>
-
-        <!-- ONE Paint URL for the WHOLE timer -->
-        <img id="paint" src="" alt="">
-
-    </div>
-
+<div id="timer">00:00</div>
 
 <script>
 
-    const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
 
-    const paintUrl = params.get("paint");
-
-    const startValue = params.get("start") || "00:00";
-
-    const size = params.get("size") || "120";
+const paintUrl = params.get("paint");
+const startValue = params.get("start") || "00:00";
+const size = params.get("size") || "120";
 
 
-    /*
-        Set timer size
-    */
-
-    document.getElementById("timer").style.fontSize =
-        size + "px";
+/* Timer size */
+document.getElementById("timer").style.fontSize = size + "px";
 
 
-    /*
-        Load the ONE Paint URL
-    */
+/*
+ONE Paint URL for the WHOLE timer.
+*/
+if (paintUrl) {
+    document.getElementById("timer").style.setProperty(
+        "--paint",
+        `url("${paintUrl}")`
+    );
+}
 
-    if (paintUrl) {
 
-        document.getElementById("paint").src =
-            paintUrl;
+/* Convert starting time into seconds */
+function parseTime(value) {
 
+    const parts = value.split(":").map(Number);
+
+    if (parts.length === 2) {
+        return (parts[0] * 60) + parts[1];
     }
 
-
-    /*
-        Convert:
-
-        00:00
-        01:30
-        10:45
-        1:24:08
-
-        into seconds.
-    */
-
-    function parseTime(value) {
-
-        const parts = value.split(":").map(Number);
-
-        if (parts.length === 2) {
-
-            return (
-                (parts[0] * 60) +
-                parts[1]
-            );
-
-        }
-
-        if (parts.length === 3) {
-
-            return (
-                (parts[0] * 3600) +
-                (parts[1] * 60) +
-                parts[2]
-            );
-
-        }
-
-        return 0;
-    }
-
-
-    let elapsed =
-        parseTime(startValue);
-
-    let lastTime =
-        Date.now();
-
-
-    /*
-        Format timer.
-    */
-
-    function formatTime(seconds) {
-
-        seconds = Math.max(
-            0,
-            Math.floor(seconds)
+    if (parts.length === 3) {
+        return (
+            (parts[0] * 3600) +
+            (parts[1] * 60) +
+            parts[2]
         );
+    }
 
-        const hours =
-            Math.floor(seconds / 3600);
-
-        const minutes =
-            Math.floor((seconds % 3600) / 60);
-
-        const secs =
-            seconds % 60;
+    return 0;
+}
 
 
-        if (hours > 0) {
+let elapsed = parseTime(startValue);
+let lastTime = Date.now();
 
-            return (
-                String(hours).padStart(2, "0") +
-                ":" +
-                String(minutes).padStart(2, "0") +
-                ":" +
-                String(secs).padStart(2, "0")
-            );
 
-        }
+/* Format timer */
+function formatTime(seconds) {
 
+    seconds = Math.floor(seconds);
+
+    const hours = Math.floor(seconds / 3600);
+
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    const secs = seconds % 60;
+
+
+    if (hours > 0) {
 
         return (
+            String(hours).padStart(2, "0") +
+            ":" +
             String(minutes).padStart(2, "0") +
             ":" +
             String(secs).padStart(2, "0")
         );
+
     }
 
 
-    /*
-        Run timer
-    */
-
-    function updateTimer() {
-
-        const now = Date.now();
-
-        const difference =
-            (now - lastTime) / 1000;
-
-        elapsed += difference;
-
-        lastTime = now;
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+    );
+}
 
 
-        document.getElementById("time").textContent =
-            formatTime(elapsed);
+/* Run timer */
+function updateTimer() {
+
+    const now = Date.now();
+
+    elapsed += (now - lastTime) / 1000;
+
+    lastTime = now;
+
+    document.getElementById("timer").textContent =
+        formatTime(elapsed);
+
+    requestAnimationFrame(updateTimer);
+}
 
 
-        requestAnimationFrame(updateTimer);
-    }
-
-
-    updateTimer();
+updateTimer();
 
 </script>
 
