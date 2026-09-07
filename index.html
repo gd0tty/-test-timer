@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Twitch Timer</title>
 
     <style>
         html, body {
             margin: 0;
+            padding: 0;
             width: 100%;
             height: 100%;
             background: transparent;
@@ -18,35 +22,258 @@
             align-items: center;
         }
 
+        /* 7TV PAINT */
+        #paint {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* TIMER */
         #timer {
+            position: relative;
+            z-index: 2;
+
             font-family: Arial, sans-serif;
             font-size: 100px;
             font-weight: bold;
+
             color: white;
+
+            text-align: center;
+
+            text-shadow:
+                0 0 5px black,
+                0 0 10px black,
+                0 0 20px black;
         }
     </style>
 </head>
 
 <body>
 
+    <!-- YOUR 7TV PAINT -->
+    <img
+        id="paint"
+        src="https://cdn.7tv.app/paint/01JK6NVC5W6VS5D0KTJXF6SQRC/layer/01JK6NX4DTTXK1527D5PWZ38X9/4x.webp"
+        alt=""
+    >
+
+    <!-- TIMER -->
     <div id="timer">00:00</div>
 
+
     <script>
-        let startTime = Date.now();
 
-        function updateTimer() {
-            let elapsed = Math.floor((Date.now() - startTime) / 1000);
+        /*
+        ==========================================
+        TWITCH TIMER
+        ==========================================
+        */
 
-            let minutes = Math.floor(elapsed / 60);
-            let seconds = elapsed % 60;
+        let elapsedSeconds = 0;
+        let isPaused = false;
 
-            document.getElementById("timer").textContent =
-                String(minutes).padStart(2, "0") + ":" +
+        const timer = document.getElementById("timer");
+
+
+        /*
+        ==========================================
+        DISPLAY TIMER
+        ==========================================
+        */
+
+        function updateDisplay() {
+
+            if (elapsedSeconds < 0) {
+                elapsedSeconds = 0;
+            }
+
+            const minutes = Math.floor(elapsedSeconds / 60);
+            const seconds = elapsedSeconds % 60;
+
+            timer.textContent =
+                String(minutes).padStart(2, "0") +
+                ":" +
                 String(seconds).padStart(2, "0");
         }
 
-        updateTimer();
-        setInterval(updateTimer, 250);
+
+        /*
+        ==========================================
+        COUNT UP
+        ==========================================
+        */
+
+        setInterval(() => {
+
+            if (!isPaused) {
+                elapsedSeconds++;
+                updateDisplay();
+            }
+
+        }, 1000);
+
+
+        /*
+        ==========================================
+        PAUSE
+        ==========================================
+        */
+
+        function pauseTimer() {
+
+            isPaused = true;
+
+            updateDisplay();
+        }
+
+
+        /*
+        ==========================================
+        RESUME
+        ==========================================
+        */
+
+        function resumeTimer() {
+
+            isPaused = false;
+
+            updateDisplay();
+        }
+
+
+        /*
+        ==========================================
+        RESET
+        ==========================================
+        */
+
+        function resetTimer() {
+
+            elapsedSeconds = 0;
+            isPaused = false;
+
+            updateDisplay();
+        }
+
+
+        /*
+        ==========================================
+        ADD TIME
+        ==========================================
+        */
+
+        function addTime(seconds) {
+
+            seconds = Number(seconds);
+
+            if (!isNaN(seconds)) {
+                elapsedSeconds += seconds;
+            }
+
+            updateDisplay();
+        }
+
+
+        /*
+        ==========================================
+        REMOVE TIME
+        ==========================================
+        */
+
+        function removeTime(seconds) {
+
+            seconds = Number(seconds);
+
+            if (!isNaN(seconds)) {
+                elapsedSeconds -= seconds;
+            }
+
+            if (elapsedSeconds < 0) {
+                elapsedSeconds = 0;
+            }
+
+            updateDisplay();
+        }
+
+
+        /*
+        ==========================================
+        SET TIME
+        ==========================================
+        */
+
+        function setTime(time) {
+
+            const parts = String(time).split(":");
+
+            if (parts.length === 2) {
+
+                const minutes = parseInt(parts[0]);
+                const seconds = parseInt(parts[1]);
+
+                if (
+                    !isNaN(minutes) &&
+                    !isNaN(seconds)
+                ) {
+
+                    elapsedSeconds =
+                        (minutes * 60) + seconds;
+
+                }
+            }
+
+            updateDisplay();
+        }
+
+
+        /*
+        ==========================================
+        BOT CONTROL API
+        ==========================================
+
+        The Twitch bot we'll create next will
+        eventually call these functions.
+
+        Examples:
+
+        pauseTimer()
+        resumeTimer()
+        resetTimer()
+        addTime(30)
+        removeTime(30)
+        setTime("10:00")
+        */
+
+        window.timerControls = {
+
+            pause: pauseTimer,
+
+            resume: resumeTimer,
+
+            reset: resetTimer,
+
+            add: addTime,
+
+            remove: removeTime,
+
+            set: setTime
+
+        };
+
+
+        /*
+        ==========================================
+        START
+        ==========================================
+        */
+
+        updateDisplay();
+
     </script>
 
 </body>
