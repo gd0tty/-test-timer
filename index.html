@@ -7,11 +7,11 @@
 <title>TimerForge — OBS Timer Generator</title>
 
 <style>
+
 :root {
     --blue: #19c8ff;
     --blue2: #4ee4ff;
     --deep: #061522;
-    --deep2: #0a2236;
     --panel: rgba(10, 32, 52, .72);
     --border: rgba(88, 218, 255, .22);
     --text: #f4fcff;
@@ -31,14 +31,30 @@ body {
     min-height: 100vh;
     font-family: Inter, Arial, sans-serif;
     color: var(--text);
+
     background:
-        radial-gradient(circle at 15% 10%, rgba(25, 200, 255, .18), transparent 30%),
-        radial-gradient(circle at 85% 20%, rgba(78, 228, 255, .12), transparent 28%),
-        linear-gradient(135deg, #04101b, #071a2c 50%, #04101b);
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(25, 200, 255, .18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(78, 228, 255, .12),
+            transparent 28%
+        ),
+        linear-gradient(
+            135deg,
+            #04101b,
+            #071a2c 50%,
+            #04101b
+        );
+
     overflow-x: hidden;
 }
 
-/* BACKGROUND */
+
+
 
 .background-glow {
     position: fixed;
@@ -48,7 +64,9 @@ body {
     background: rgba(25, 200, 255, .08);
     filter: blur(100px);
     pointer-events: none;
-    animation: floatGlow 8s ease-in-out infinite alternate;
+
+    animation:
+        floatGlow 8s ease-in-out infinite alternate;
 }
 
 .glow-one {
@@ -63,6 +81,7 @@ body {
 }
 
 @keyframes floatGlow {
+
     from {
         transform: translateY(0) scale(1);
     }
@@ -70,20 +89,31 @@ body {
     to {
         transform: translateY(40px) scale(1.15);
     }
+
 }
+
 
 .particles {
     position: fixed;
     inset: 0;
     pointer-events: none;
     opacity: .25;
+
     background-image:
-        radial-gradient(circle, rgba(255,255,255,.7) 1px, transparent 1px);
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.7) 1px,
+            transparent 1px
+        );
+
     background-size: 55px 55px;
-    animation: moveParticles 25s linear infinite;
+
+    animation:
+        moveParticles 25s linear infinite;
 }
 
 @keyframes moveParticles {
+
     from {
         background-position: 0 0;
     }
@@ -91,167 +121,102 @@ body {
     to {
         background-position: 250px 250px;
     }
+
 }
 
-/* MAIN */
+
+
 
 .container {
     width: min(1180px, calc(100% - 40px));
     margin: auto;
+
     position: relative;
     z-index: 2;
+
+    padding-top: 45px;
 }
 
-/* NAV */
 
-nav {
-    height: 90px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: -.5px;
-}
-
-.logo-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 13px;
-    display: grid;
-    place-items: center;
-    font-size: 21px;
-    background: linear-gradient(135deg, var(--blue), var(--blue2));
-    color: #001522;
-    box-shadow: 0 0 30px rgba(25,200,255,.35);
-}
-
-.logo span {
-    color: var(--blue2);
-}
-
-.nav-badge {
-    border: 1px solid var(--border);
-    background: rgba(10, 35, 55, .55);
-    padding: 9px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-/* HERO */
-
-.hero {
-    text-align: center;
-    padding: 55px 0 45px;
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 13px;
-    border-radius: 999px;
-    border: 1px solid rgba(78,228,255,.25);
-    background: rgba(25,200,255,.08);
-    color: var(--blue2);
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.badge-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #47ff9c;
-    box-shadow: 0 0 12px #47ff9c;
-}
-
-.hero h1 {
-    margin: 22px auto 14px;
-    max-width: 850px;
-    font-size: clamp(44px, 7vw, 78px);
-    line-height: .98;
-    letter-spacing: -4px;
-}
-
-.gradient {
-    background: linear-gradient(
-        90deg,
-        #ffffff,
-        var(--blue2),
-        var(--blue)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.hero p {
-    max-width: 620px;
-    margin: auto;
-    color: var(--muted);
-    font-size: 17px;
-    line-height: 1.7;
-}
-
-/* PANELS */
 
 .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 22px;
+
     padding-bottom: 70px;
 }
 
+
 .panel {
     position: relative;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    backdrop-filter: blur(25px);
+
+    border:
+        1px solid var(--border);
+
+    background:
+        var(--panel);
+
+    backdrop-filter:
+        blur(25px);
+
     border-radius: 24px;
+
     padding: 28px;
+
     box-shadow:
         0 30px 80px rgba(0,0,0,.25),
         inset 0 1px rgba(255,255,255,.04);
+
     overflow: hidden;
 }
 
+
 .panel::before {
     content: "";
+
     position: absolute;
+
     top: 0;
     left: 15%;
     right: 15%;
+
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--blue),
-        transparent
-    );
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--blue),
+            transparent
+        );
+
     opacity: .7;
 }
 
+
 .panel-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
     margin-bottom: 25px;
 }
+
 
 .panel-title {
     font-size: 18px;
     font-weight: 900;
 }
+
 
 .panel-subtitle {
     color: var(--muted);
@@ -259,100 +224,174 @@ nav {
     margin-top: 5px;
 }
 
+
 .step {
     font-size: 11px;
-    color: var(--blue2);
-    border: 1px solid var(--border);
-    padding: 7px 10px;
-    border-radius: 9px;
+
+    color:
+        var(--blue2);
+
+    border:
+        1px solid var(--border);
+
+    padding:
+        7px 10px;
+
+    border-radius:
+        9px;
 }
 
-/* INPUTS */
+
+
 
 .field {
     margin-bottom: 19px;
 }
 
+
 .field label {
     display: block;
+
     margin-bottom: 8px;
+
     font-size: 12px;
-    color: #b8d8e6;
+
+    color:
+        #b8d8e6;
+
     font-weight: 800;
 }
+
 
 .input {
     width: 100%;
     height: 50px;
+
     border-radius: 13px;
-    border: 1px solid rgba(139,181,200,.18);
-    background: rgba(2, 13, 23, .65);
+
+    border:
+        1px solid
+        rgba(139,181,200,.18);
+
+    background:
+        rgba(2,13,23,.65);
+
     color: white;
+
     outline: none;
-    padding: 0 15px;
+
+    padding:
+        0 15px;
+
     font-size: 14px;
+
     transition: .2s;
 }
 
+
 .input:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 4px rgba(25,200,255,.08);
+    border-color:
+        var(--blue);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(25,200,255,.08);
 }
+
 
 .row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
+
     gap: 13px;
 }
 
-/* BUTTON */
+
+
 
 .generate {
     width: 100%;
     height: 56px;
+
     border: 0;
+
     border-radius: 15px;
-    color: #001522;
+
+    color:
+        #001522;
+
     font-weight: 950;
+
     font-size: 15px;
+
     cursor: pointer;
-    background: linear-gradient(
-        90deg,
-        var(--blue),
-        var(--blue2),
-        var(--blue)
-    );
-    background-size: 200% 100%;
-    box-shadow: 0 10px 35px rgba(25,200,255,.22);
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            var(--blue2),
+            var(--blue)
+        );
+
+    background-size:
+        200% 100%;
+
+    box-shadow:
+        0 10px 35px
+        rgba(25,200,255,.22);
+
     transition: .2s;
-    animation: buttonFlow 3s linear infinite;
+
+    animation:
+        buttonFlow 3s linear infinite;
 }
+
 
 .generate:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 45px rgba(25,200,255,.32);
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 15px 45px
+        rgba(25,200,255,.32);
 }
+
 
 .generate:active {
-    transform: translateY(1px);
+    transform:
+        translateY(1px);
 }
 
+
 @keyframes buttonFlow {
+
     from {
-        background-position: 0% 50%;
+        background-position:
+            0% 50%;
     }
 
     to {
-        background-position: 200% 50%;
+        background-position:
+            200% 50%;
     }
+
 }
 
-/* PREVIEW */
+
+
 
 .preview-box {
     min-height: 350px;
+
     border-radius: 18px;
-    border: 1px solid rgba(139,181,200,.13);
+
+    border:
+        1px solid
+        rgba(139,181,200,.13);
+
     background:
         linear-gradient(
             45deg,
@@ -361,163 +400,266 @@ nav {
             transparent 75%,
             rgba(255,255,255,.025) 75%
         );
-    background-size: 28px 28px;
+
+    background-size:
+        28px 28px;
+
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
     overflow: hidden;
 }
 
+
 .preview-label {
-    color: var(--muted);
+    color:
+        var(--muted);
+
     font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 18px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        2px;
+
+    margin-bottom:
+        18px;
 }
+
 
 .preview-timer {
     font-size: 86px;
+
     font-weight: 900;
+
     line-height: 1;
+
     letter-spacing: -5px;
+
     color: white;
+
     text-shadow:
-        0 0 25px rgba(25,200,255,.35);
+        0 0 25px
+        rgba(25,200,255,.35);
+
     transition: .2s;
 }
 
+
 .preview-font {
     margin-top: 25px;
-    color: var(--muted);
+
+    color:
+        var(--muted);
+
     font-size: 12px;
 }
 
-/* RESULT */
+
+
 
 .result {
     display: none;
+
     margin-top: 18px;
-    animation: resultIn .4s ease;
+
+    animation:
+        resultIn .4s ease;
 }
 
+
 @keyframes resultIn {
+
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform:
+            translateY(10px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform:
+            translateY(0);
     }
+
 }
+
 
 .result-box {
     padding: 15px;
+
     border-radius: 14px;
-    background: rgba(25,200,255,.06);
-    border: 1px solid rgba(25,200,255,.2);
+
+    background:
+        rgba(25,200,255,.06);
+
+    border:
+        1px solid
+        rgba(25,200,255,.2);
 }
 
+
 .result-label {
-    color: var(--blue2);
+    color:
+        var(--blue2);
+
     font-size: 11px;
+
     font-weight: 900;
-    text-transform: uppercase;
+
+    text-transform:
+        uppercase;
+
     margin-bottom: 8px;
 }
 
+
 .generated-link {
-    color: #dff9ff;
+    color:
+        #dff9ff;
+
     font-size: 12px;
-    word-break: break-all;
-    line-height: 1.5;
+
+    word-break:
+        break-all;
+
+    line-height:
+        1.5;
 }
+
 
 .copy {
     margin-top: 12px;
+
     width: 100%;
     height: 43px;
-    border: 1px solid var(--border);
-    border-radius: 11px;
-    background: rgba(25,200,255,.08);
-    color: var(--blue2);
-    font-weight: 800;
-    cursor: pointer;
-    transition: .2s;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        11px;
+
+    background:
+        rgba(25,200,255,.08);
+
+    color:
+        var(--blue2);
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        .2s;
 }
+
 
 .copy:hover {
-    background: rgba(25,200,255,.15);
+    background:
+        rgba(25,200,255,.15);
 }
 
-/* INFO */
+
+
 
 .info {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 12px;
+
     margin-top: 20px;
 }
 
+
 .info-card {
     padding: 14px;
+
     border-radius: 13px;
-    border: 1px solid rgba(139,181,200,.12);
-    background: rgba(255,255,255,.02);
+
+    border:
+        1px solid
+        rgba(139,181,200,.12);
+
+    background:
+        rgba(255,255,255,.02);
 }
+
 
 .info-card strong {
     display: block;
+
     font-size: 12px;
+
     margin-bottom: 4px;
 }
 
+
 .info-card span {
     font-size: 11px;
-    color: var(--muted);
+
+    color:
+        var(--muted);
 }
 
-/* FOOTER */
+
+
 
 footer {
     text-align: center;
-    padding: 0 0 35px;
-    color: #5f8497;
+
+    padding:
+        0 0 35px;
+
+    color:
+        #5f8497;
+
     font-size: 11px;
 }
 
-/* RESPONSIVE */
+
+
 
 @media (max-width: 800px) {
 
     .grid {
-        grid-template-columns: 1fr;
-    }
-
-    .hero h1 {
-        letter-spacing: -2px;
+        grid-template-columns:
+            1fr;
     }
 
     .info {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
-    nav {
-        height: 75px;
-    }
-
-    .nav-badge {
-        display: none;
-    }
 }
+
 
 @media (max-width: 500px) {
 
     .container {
-        width: min(100% - 24px, 1180px);
+        width:
+            min(
+                100% - 24px,
+                1180px
+            );
+
+        padding-top: 25px;
     }
 
     .panel {
@@ -525,327 +667,344 @@ footer {
     }
 
     .row {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
     .preview-timer {
         font-size: 60px;
     }
+
 }
+
 </style>
 </head>
 
+
 <body>
 
+
 <div class="background-glow glow-one"></div>
+
 <div class="background-glow glow-two"></div>
+
 <div class="particles"></div>
+
 
 <div class="container">
 
-    <nav>
 
-        <div class="logo">
-            <div class="logo-icon">⏱</div>
+<section class="grid">
 
-            <div>
-                Timer<span>Forge</span>
+
+
+
+<div class="panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <div class="panel-title">
+                Timer Settings
             </div>
+
+            <div class="panel-subtitle">
+                Configure your overlay
+            </div>
+
         </div>
 
-        <div class="nav-badge">
-            OBS Overlay Generator
+        <div class="step">
+            STEP 01
         </div>
 
-    </nav>
+    </div>
 
 
-    <section class="hero">
+    
 
-        <div class="badge">
-            <span class="badge-dot"></span>
-            Generator Online
-        </div>
+    <div class="field">
 
-        <h1>
-            Build your
-            <span class="gradient">
-                perfect timer.
-            </span>
-        </h1>
+        <label>
+            7TV Paint URL
+        </label>
 
-        <p>
-            Create a custom OBS timer overlay with
-            any 7TV Paint and almost any Google Font.
-            One URL. One timer.
-        </p>
+        <input
+            class="input"
+            id="paintUrl"
+            type="text"
+            placeholder="Paste your 7TV Paint URL..."
+        >
 
-    </section>
+    </div>
 
 
-    <section class="grid">
+    
+
+    <div class="field">
+
+        <label>
+            Google Font
+        </label>
+
+        <input
+            class="input"
+            id="fontName"
+            type="text"
+            value="Roboto"
+            placeholder="Example: Bebas Neue"
+        >
+
+    </div>
 
 
-        <!-- SETTINGS -->
+    
 
-        <div class="panel">
+    <div class="row">
 
-            <div class="panel-header">
+        <div class="field">
 
-                <div>
-                    <div class="panel-title">
-                        Timer Settings
-                    </div>
+            <label>
+                Starting Time
+            </label>
 
-                    <div class="panel-subtitle">
-                        Configure your overlay
-                    </div>
-                </div>
-
-                <div class="step">
-                    STEP 01
-                </div>
-
-            </div>
-
-
-            <div class="field">
-
-                <label>
-                    7TV Paint URL
-                </label>
-
-                <input
-                    class="input"
-                    id="paintUrl"
-                    type="text"
-                    placeholder="Paste your 7TV Paint URL..."
-                >
-
-            </div>
-
-
-            <div class="field">
-
-                <label>
-                    Google Font
-                </label>
-
-                <input
-                    class="input"
-                    id="fontName"
-                    type="text"
-                    value="Roboto"
-                    placeholder="Example: Bebas Neue"
-                >
-
-            </div>
-
-
-            <div class="row">
-
-                <div class="field">
-
-                    <label>
-                        Starting Time
-                    </label>
-
-                    <input
-                        class="input"
-                        id="startTime"
-                        type="text"
-                        value="00:00"
-                        placeholder="00:00"
-                    >
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Font Size
-                    </label>
-
-                    <input
-                        class="input"
-                        id="fontSize"
-                        type="number"
-                        value="120"
-                        min="20"
-                        max="500"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <button
-                class="generate"
-                onclick="generateTimer()"
+            <input
+                class="input"
+                id="startTime"
+                type="text"
+                value="00:00"
+                placeholder="00:00"
             >
-                ✦ Generate OBS Timer
-            </button>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Font Size
+            </label>
+
+            <input
+                class="input"
+                id="fontSize"
+                type="number"
+                value="120"
+                min="20"
+                max="500"
+            >
+
+        </div>
+
+    </div>
+
+
+    
+
+    <button
+        class="generate"
+        onclick="generateTimer()"
+    >
+        ✦ Generate OBS Timer
+    </button>
+
+
+    
+
+    <div
+        class="result"
+        id="result"
+    >
+
+        <div class="result-box">
+
+            <div class="result-label">
+                Your OBS Browser Source URL
+            </div>
 
 
             <div
-                class="result"
-                id="result"
+                class="generated-link"
+                id="generatedLink"
+            ></div>
+
+
+            <button
+                class="copy"
+                onclick="copyURL()"
+                id="copyButton"
             >
+                Copy OBS URL
+            </button>
 
-                <div class="result-box">
+        </div>
 
-                    <div class="result-label">
-                        Your OBS Browser Source URL
-                    </div>
-
-                    <div
-                        class="generated-link"
-                        id="generatedLink"
-                    ></div>
+    </div>
 
 
-                    <button
-                        class="copy"
-                        onclick="copyURL()"
-                        id="copyButton"
-                    >
-                        Copy OBS URL
-                    </button>
+    
 
-                </div>
+    <div class="info">
 
-            </div>
+        <div class="info-card">
 
+            <strong>
+                7TV Paint
+            </strong>
 
-            <div class="info">
-
-                <div class="info-card">
-
-                    <strong>7TV Paint</strong>
-
-                    <span>
-                        One Paint URL for the whole timer
-                    </span>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <strong>Google Fonts</strong>
-
-                    <span>
-                        Choose your font by name
-                    </span>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <strong>OBS Ready</strong>
-
-                    <span>
-                        Paste the generated URL
-                    </span>
-
-                </div>
-
-            </div>
+            <span>
+                One Paint URL for the whole timer
+            </span>
 
         </div>
 
 
+        <div class="info-card">
 
-        <!-- PREVIEW -->
+            <strong>
+                Google Fonts
+            </strong>
 
-        <div class="panel">
-
-            <div class="panel-header">
-
-                <div>
-                    <div class="panel-title">
-                        Live Preview
-                    </div>
-
-                    <div class="panel-subtitle">
-                        See your timer before adding it to OBS
-                    </div>
-                </div>
-
-                <div class="step">
-                    LIVE
-                </div>
-
-            </div>
-
-
-            <div class="preview-box">
-
-                <div class="preview-label">
-                    Timer Preview
-                </div>
-
-                <div
-                    class="preview-timer"
-                    id="previewTimer"
-                >
-                    00:00
-                </div>
-
-                <div
-                    class="preview-font"
-                    id="previewFont"
-                >
-                    Font: Roboto
-                </div>
-
-            </div>
+            <span>
+                Choose your font by name
+            </span>
 
         </div>
 
-    </section>
 
+        <div class="info-card">
 
-    <footer>
-        TimerForge • Built for OBS
-    </footer>
+            <strong>
+                OBS Ready
+            </strong>
+
+            <span>
+                Paste the generated URL
+            </span>
+
+        </div>
+
+    </div>
 
 </div>
 
 
+
+
+
+<div class="panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <div class="panel-title">
+                Live Preview
+            </div>
+
+            <div class="panel-subtitle">
+                See your timer before adding it to OBS
+            </div>
+
+        </div>
+
+        <div class="step">
+            LIVE
+        </div>
+
+    </div>
+
+
+    <div class="preview-box">
+
+        <div class="preview-label">
+            Timer Preview
+        </div>
+
+
+        <div
+            class="preview-timer"
+            id="previewTimer"
+        >
+            00:00
+        </div>
+
+
+        <div
+            class="preview-font"
+            id="previewFont"
+        >
+            Font: Roboto
+        </div>
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+<footer>
+    TimerForge • Built for OBS
+</footer>
+
+
+</div>
+
+
+
 <script>
 
-/* =========================================
-   LIVE PREVIEW
-   ========================================= */
+
+
 
 let previewSeconds = 0;
 
+
 const previewTimer =
-    document.getElementById("previewTimer");
+    document.getElementById(
+        "previewTimer"
+    );
+
 
 const fontInput =
-    document.getElementById("fontName");
+    document.getElementById(
+        "fontName"
+    );
+
 
 const sizeInput =
-    document.getElementById("fontSize");
+    document.getElementById(
+        "fontSize"
+    );
+
 
 const previewFont =
-    document.getElementById("previewFont");
+    document.getElementById(
+        "previewFont"
+    );
+
 
 
 function formatTime(seconds) {
 
-    seconds = Math.floor(seconds);
+    seconds =
+        Math.floor(seconds);
+
 
     const hours =
-        Math.floor(seconds / 3600);
+        Math.floor(
+            seconds / 3600
+        );
+
 
     const minutes =
-        Math.floor((seconds % 3600) / 60);
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
 
     const secs =
         seconds % 60;
@@ -854,22 +1013,39 @@ function formatTime(seconds) {
     if (hours > 0) {
 
         return (
-            String(hours).padStart(2, "0") +
-            ":" +
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(secs).padStart(2, "0")
+
+            String(hours)
+                .padStart(2, "0")
+
+            + ":" +
+
+            String(minutes)
+                .padStart(2, "0")
+
+            + ":" +
+
+            String(secs)
+                .padStart(2, "0")
+
         );
 
     }
 
 
     return (
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(secs).padStart(2, "0")
+
+        String(minutes)
+            .padStart(2, "0")
+
+        + ":" +
+
+        String(secs)
+            .padStart(2, "0")
+
     );
+
 }
+
 
 
 setInterval(function() {
@@ -877,48 +1053,66 @@ setInterval(function() {
     previewSeconds++;
 
     previewTimer.textContent =
-        formatTime(previewSeconds);
+        formatTime(
+            previewSeconds
+        );
 
 }, 1000);
 
 
-/* =========================================
-   LIVE FONT PREVIEW
-   ========================================= */
+
+
 
 function updatePreviewFont() {
 
     const font =
-        fontInput.value.trim() || "Roboto";
+        fontInput.value.trim()
+        || "Roboto";
+
 
     const encoded =
-        font.replace(/\s+/g, "+");
+        font.replace(
+            /\s+/g,
+            "+"
+        );
 
 
-    const link =
-        document.getElementById("previewGoogleFont");
+    const oldLink =
+        document.getElementById(
+            "previewGoogleFont"
+        );
 
 
-    if (link) {
-        link.remove();
+    if (oldLink) {
+
+        oldLink.remove();
+
     }
 
 
     const fontLink =
-        document.createElement("link");
+        document.createElement(
+            "link"
+        );
+
 
     fontLink.id =
         "previewGoogleFont";
 
+
     fontLink.rel =
         "stylesheet";
+
 
     fontLink.href =
         "https://fonts.googleapis.com/css2?family=" +
         encoded +
         ":wght@100;200;300;400;500;600;700;800;900&display=swap";
 
-    document.head.appendChild(fontLink);
+
+    document.head.appendChild(
+        fontLink
+    );
 
 
     previewTimer.style.fontFamily =
@@ -927,7 +1121,9 @@ function updatePreviewFont() {
 
     previewFont.textContent =
         "Font: " + font;
+
 }
+
 
 
 fontInput.addEventListener(
@@ -936,51 +1132,71 @@ fontInput.addEventListener(
 );
 
 
+
+
+
 sizeInput.addEventListener(
     "input",
     function() {
 
         const size =
-            Number(sizeInput.value) || 120;
+            Number(
+                sizeInput.value
+            ) || 120;
+
 
         previewTimer.style.fontSize =
-            Math.min(size * .72, 120) + "px";
+            Math.min(
+                size * .72,
+                120
+            ) + "px";
 
     }
 );
+
 
 
 updatePreviewFont();
 
 
 
-/* =========================================
-   GENERATE OBS URL
-   ========================================= */
+
 
 function generateTimer() {
 
+
     const paint =
-        document.getElementById("paintUrl")
+        document.getElementById(
+            "paintUrl"
+        )
         .value
         .trim();
 
 
     const start =
-        document.getElementById("startTime")
+        document.getElementById(
+            "startTime"
+        )
         .value
-        .trim() || "00:00";
+        .trim()
+        || "00:00";
 
 
     const size =
-        document.getElementById("fontSize")
-        .value || "120";
+        document.getElementById(
+            "fontSize"
+        )
+        .value
+        || "120";
 
 
     const font =
-        document.getElementById("fontName")
+        document.getElementById(
+            "fontName"
+        )
         .value
-        .trim() || "Roboto";
+        .trim()
+        || "Roboto";
 
 
     if (!paint) {
@@ -990,15 +1206,11 @@ function generateTimer() {
         );
 
         return;
+
     }
 
 
-    /*
-        Automatically create the
-        overlay.html URL based on
-        the current GitHub Pages site.
-    */
-
+   
     const overlay =
         new URL(
             "overlay.html",
@@ -1030,13 +1242,7 @@ function generateTimer() {
     );
 
 
-    /*
-        Cache buster.
-
-        Every generated URL gets a
-        new version number so OBS
-        doesn't keep an old overlay.
-    */
+    
 
     overlay.searchParams.set(
         "v",
@@ -1064,15 +1270,15 @@ function generateTimer() {
         "copyButton"
     ).textContent =
         "Copy OBS URL";
+
 }
 
 
 
-/* =========================================
-   COPY
-   ========================================= */
+
 
 function copyURL() {
+
 
     const url =
         document.getElementById(
@@ -1080,7 +1286,9 @@ function copyURL() {
         ).textContent;
 
 
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(
+        url
+    );
 
 
     const button =
@@ -1093,12 +1301,15 @@ function copyURL() {
         "✓ Copied!";
 
 
-    setTimeout(function() {
+    setTimeout(
+        function() {
 
-        button.textContent =
-            "Copy OBS URL";
+            button.textContent =
+                "Copy OBS URL";
 
-    }, 1800);
+        },
+        1800
+    );
 
 }
 
