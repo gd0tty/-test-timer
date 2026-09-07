@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Timer Overlay</title>
 
 <style>
@@ -16,33 +18,36 @@
 
     body {
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
     }
 
     #timer {
         display: inline-block;
-        position: relative;
 
-        font-family: Arial, sans-serif;
+        font-family: Arial, Helvetica, sans-serif;
         font-weight: 900;
+
         font-size: 120px;
         line-height: 1;
 
         white-space: nowrap;
 
         /*
-        The Paint is applied to the ENTIRE timer.
+        THE ONE PAINT URL IS APPLIED TO
+        THE WHOLE TIMER.
         */
+
         background-image: var(--paint);
         background-repeat: no-repeat;
-        background-size: 100% 100%;
         background-position: center;
+        background-size: 100% 100%;
 
         /*
-        Makes the Paint visible ONLY through the timer text.
-        No rectangle.
+        THIS IS WHAT PREVENTS THE
+        RECTANGLE FROM SHOWING.
         */
+
         -webkit-background-clip: text;
         background-clip: text;
 
@@ -60,27 +65,34 @@
 
 const params = new URLSearchParams(window.location.search);
 
-const paintUrl = params.get("paint");
-const startValue = params.get("start") || "00:00";
+const paint = params.get("paint");
+const start = params.get("start") || "00:00";
 const size = params.get("size") || "120";
+
+const timer = document.getElementById("timer");
 
 
 /* Timer size */
-document.getElementById("timer").style.fontSize = size + "px";
+timer.style.fontSize = size + "px";
 
 
 /*
-ONE Paint URL for the WHOLE timer.
+    ONE Paint URL.
+
+    It applies to the ENTIRE timer,
+    NOT individual digits.
 */
-if (paintUrl) {
-    document.getElementById("timer").style.setProperty(
+
+if (paint) {
+    timer.style.setProperty(
         "--paint",
-        `url("${paintUrl}")`
+        `url("${paint.replace(/"/g, '\\"')}")`
     );
 }
 
 
-/* Convert starting time into seconds */
+/* Convert starting time to seconds */
+
 function parseTime(value) {
 
     const parts = value.split(":").map(Number);
@@ -101,20 +113,24 @@ function parseTime(value) {
 }
 
 
-let elapsed = parseTime(startValue);
-let lastTime = Date.now();
+let elapsed = parseTime(start);
+
+let lastTime = performance.now();
 
 
 /* Format timer */
+
 function formatTime(seconds) {
 
     seconds = Math.floor(seconds);
 
     const hours = Math.floor(seconds / 3600);
 
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const minutes =
+        Math.floor((seconds % 3600) / 60);
 
-    const secs = seconds % 60;
+    const secs =
+        seconds % 60;
 
 
     if (hours > 0) {
@@ -139,22 +155,22 @@ function formatTime(seconds) {
 
 
 /* Run timer */
-function updateTimer() {
 
-    const now = Date.now();
+function update() {
+
+    const now = performance.now();
 
     elapsed += (now - lastTime) / 1000;
 
     lastTime = now;
 
-    document.getElementById("timer").textContent =
-        formatTime(elapsed);
+    timer.textContent = formatTime(elapsed);
 
-    requestAnimationFrame(updateTimer);
+    requestAnimationFrame(update);
 }
 
 
-updateTimer();
+update();
 
 </script>
 
