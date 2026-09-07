@@ -3,95 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>first test timer</title>
+
+    <title>Timer Generator</title>
 
     <style>
         * {
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
+            min-height: 100%;
+        }
+
+        body {
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #111;
-            font-family: Arial, sans-serif;
+
+            font-family: Arial, Helvetica, sans-serif;
             color: white;
+
+            background:
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(0, 195, 255, 0.30),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 80% 80%,
+                    rgba(0, 110, 255, 0.25),
+                    transparent 35%
+                ),
+                linear-gradient(
+                    135deg,
+                    #06131f,
+                    #08263a,
+                    #04121e
+                );
+
+            overflow-x: hidden;
         }
+
+
+        body::before {
+            content: "";
+            position: fixed;
+
+            width: 500px;
+            height: 500px;
+
+            border-radius: 50%;
+
+            background: rgba(0, 200, 255, 0.12);
+
+            filter: blur(100px);
+
+            top: -200px;
+            left: -150px;
+
+            animation: floatGlow 7s ease-in-out infinite alternate;
+
+            pointer-events: none;
+        }
+
+
+        body::after {
+            content: "";
+
+            position: fixed;
+
+            width: 450px;
+            height: 450px;
+
+            border-radius: 50%;
+
+            background: rgba(0, 120, 255, 0.12);
+
+            filter: blur(100px);
+
+            bottom: -200px;
+            right: -150px;
+
+            animation: floatGlow2 8s ease-in-out infinite alternate;
+
+            pointer-events: none;
+        }
+
+
+        @keyframes floatGlow {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(100px, 80px);
+            }
+        }
+
+
+        @keyframes floatGlow2 {
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(-100px, -80px);
+            }
+        }
+
 
         .box {
-            width: 450px;
-            padding: 30px;
-            border-radius: 18px;
-            background: #1c1c1c;
-            box-shadow: 0 10px 40px rgba(0,0,0,.4);
+            position: relative;
+
+            width: min(500px, calc(100% - 30px));
+
+            padding: 35px;
+
+            border-radius: 24px;
+
+            background: rgba(8, 30, 45, 0.78);
+
+            border: 1px solid rgba(100, 220, 255, 0.25);
+
+            backdrop-filter: blur(20px);
+
+            box-shadow:
+                0 0 30px rgba(0, 190, 255, 0.12),
+                0 25px 70px rgba(0, 0, 0, 0.45);
+
+            overflow: hidden;
         }
 
-        h1 {
-            margin-top: 0;
-            text-align: center;
+
+        .box::before {
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+            left: 10%;
+
+            width: 80%;
+            height: 2px;
+
+            background: linear-gradient(
+                90deg,
+                transparent,
+                #00d9ff,
+                #6ee7ff,
+                #00aaff,
+                transparent
+            );
+
+            box-shadow:
+                0 0 15px #00cfff,
+                0 0 35px #00aaff;
         }
+
+
+        h1 {
+            margin: 0 0 30px;
+
+            text-align: center;
+
+            font-size: 32px;
+
+            letter-spacing: -1px;
+
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #7eeeff,
+                #ffffff
+            );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            text-shadow:
+                0 0 25px rgba(0, 210, 255, 0.35);
+        }
+
+
+        .subtitle {
+            text-align: center;
+
+            margin-top: -20px;
+            margin-bottom: 28px;
+
+            color: #9bdced;
+
+            font-size: 14px;
+        }
+
 
         label {
             display: block;
-            margin-top: 18px;
-            margin-bottom: 7px;
+
+            margin-top: 20px;
+            margin-bottom: 8px;
+
+            color: #c9f7ff;
+
+            font-size: 14px;
             font-weight: bold;
         }
+
 
         input {
             width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 8px;
-            background: #2b2b2b;
-            color: white;
+
+            padding: 15px 16px;
+
+            border-radius: 12px;
+
+            border: 1px solid rgba(120, 220, 255, 0.15);
+
             outline: none;
-        }
 
-        button {
-            width: 100%;
-            margin-top: 22px;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background: #9147ff;
+            background: rgba(1, 15, 25, 0.75);
+
             color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
+
+            font-size: 14px;
+
+            transition: 0.25s;
         }
 
-        button:hover {
-            background: #772ce8;
+
+        input::placeholder {
+            color: #6c8b98;
         }
+
+
+        input:focus {
+            border-color: #00d9ff;
+
+            box-shadow:
+                0 0 0 3px rgba(0, 210, 255, 0.10),
+                0 0 20px rgba(0, 210, 255, 0.15);
+
+            background: rgba(2, 20, 32, 0.9);
+        }
+
+
+        .generate {
+            position: relative;
+
+            width: 100%;
+
+            margin-top: 28px;
+
+            padding: 16px;
+
+            border: none;
+            border-radius: 12px;
+
+            cursor: pointer;
+
+            color: white;
+
+            font-size: 16px;
+            font-weight: 800;
+
+            background: linear-gradient(
+                90deg,
+                #00aaff,
+                #00d9ff,
+                #008cff
+            );
+
+            box-shadow:
+                0 0 20px rgba(0, 200, 255, 0.35),
+                0 8px 25px rgba(0, 140, 255, 0.25);
+
+            transition:
+                transform 0.2s,
+                box-shadow 0.2s;
+        }
+
+
+        .generate:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 0 30px rgba(0, 220, 255, 0.55),
+                0 12px 35px rgba(0, 140, 255, 0.35);
+        }
+
+
+        .generate:active {
+            transform: translateY(0);
+        }
+
+
+        /* Result */
 
         #result {
             display: none;
-            margin-top: 20px;
+
+            margin-top: 25px;
+
+            padding-top: 22px;
+
+            border-top: 1px solid rgba(120, 220, 255, 0.12);
         }
+
+
+        .result-title {
+            display: block;
+
+            margin-bottom: 9px;
+
+            color: #bff5ff;
+
+            font-size: 14px;
+            font-weight: bold;
+        }
+
 
         #generatedLink {
-            margin-top: 8px;
+            padding: 14px;
+
+            border-radius: 12px;
+
+            background: rgba(1, 12, 20, 0.85);
+
+            border: 1px solid rgba(80, 200, 255, 0.12);
+
+            color: #91eaff;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+
             word-break: break-all;
-            padding: 12px;
-            border-radius: 8px;
-            background: #111;
-            font-size: 13px;
+
+            box-shadow:
+                inset 0 0 20px rgba(0, 150, 255, 0.04);
         }
+
 
         .copy {
-            background: #333;
+            width: 100%;
+
             margin-top: 10px;
+
+            padding: 14px;
+
+            border: 1px solid rgba(100, 220, 255, 0.2);
+
+            border-radius: 12px;
+
+            background: rgba(20, 70, 90, 0.65);
+
+            color: #d8faff;
+
+            font-size: 14px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
         }
 
+
         .copy:hover {
-            background: #444;
+            background: rgba(0, 150, 200, 0.35);
+
+            border-color: #00d9ff;
+
+            box-shadow:
+                0 0 20px rgba(0, 210, 255, 0.18);
+        }
+
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            gap: 7px;
+
+            margin-top: 22px;
+
+            color: #79cddd;
+
+            font-size: 12px;
+        }
+
+
+        .dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #00e1ff;
+
+            box-shadow:
+                0 0 10px #00e1ff;
+
+            animation: pulse 1.5s infinite;
+        }
+
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.15);
+            }
         }
     </style>
 </head>
+
 
 <body>
 
@@ -99,14 +434,22 @@
 
     <h1>Timer Generator</h1>
 
+    <div class="subtitle">
+        Create your custom OBS timer overlay
+    </div>
+
+
     <label>7TV Paint URL</label>
+
     <input
         id="paintUrl"
         type="text"
-        placeholder="Paste your 7TV Paint URL here"
+        placeholder="Paste your 7TV Paint URL..."
     >
 
+
     <label>Starting Time</label>
+
     <input
         id="startTime"
         type="text"
@@ -114,7 +457,9 @@
         placeholder="00:00"
     >
 
+
     <label>Timer Size</label>
+
     <input
         id="fontSize"
         type="number"
@@ -123,54 +468,135 @@
         max="1000"
     >
 
-    <button onclick="generate()">Generate Timer</button>
+
+    <button
+        class="generate"
+        onclick="generate()"
+    >
+        ✨ Generate Timer
+    </button>
+
 
     <div id="result">
 
-        <strong>Your OBS Browser Source URL:</strong>
+        <span class="result-title">
+            Your OBS Browser Source URL
+        </span>
 
         <div id="generatedLink"></div>
 
-        <button class="copy" onclick="copyLink()">
-            Copy OBS URL
+        <button
+            class="copy"
+            onclick="copyLink()"
+        >
+            📋 Copy OBS URL
         </button>
 
     </div>
 
+
+    <div class="status">
+        <span class="dot"></span>
+        Timer system online
+    </div>
+
 </div>
+
 
 <script>
 
 function generate() {
 
-    const paintUrl = document.getElementById("paintUrl").value.trim();
-    const startTime = document.getElementById("startTime").value.trim();
-    const fontSize = document.getElementById("fontSize").value;
+    const paintUrl =
+        document.getElementById("paintUrl")
+        .value
+        .trim();
+
+    const startTime =
+        document.getElementById("startTime")
+        .value
+        .trim();
+
+    const fontSize =
+        document.getElementById("fontSize")
+        .value;
+
 
     if (!paintUrl) {
+
         alert("Paste a 7TV Paint URL first.");
+
         return;
     }
 
-    const baseUrl = new URL("overlay.html", window.location.href);
 
-    baseUrl.searchParams.set("paint", paintUrl);
-    baseUrl.searchParams.set("start", startTime || "00:00");
-    baseUrl.searchParams.set("size", fontSize);
+    const overlayUrl =
+        new URL(
+            "overlay.html",
+            window.location.href
+        );
 
-    const finalUrl = baseUrl.toString();
 
-    document.getElementById("generatedLink").textContent = finalUrl;
-    document.getElementById("result").style.display = "block";
+    overlayUrl.searchParams.set(
+        "paint",
+        paintUrl
+    );
+
+
+    overlayUrl.searchParams.set(
+        "start",
+        startTime || "00:00"
+    );
+
+
+    overlayUrl.searchParams.set(
+        "size",
+        fontSize
+    );
+
+
+    overlayUrl.searchParams.set(
+        "v",
+        Date.now().toString()
+    );
+
+
+    document.getElementById(
+        "generatedLink"
+    ).textContent =
+        overlayUrl.toString();
+
+
+    document.getElementById(
+        "result"
+    ).style.display = "block";
 }
+
 
 function copyLink() {
 
-    const link = document.getElementById("generatedLink").textContent;
+    const link =
+        document.getElementById(
+            "generatedLink"
+        ).textContent;
+
 
     navigator.clipboard.writeText(link);
 
-    alert("OBS URL copied!");
+
+    const button =
+        document.querySelector(".copy");
+
+
+    button.textContent = "✓ Copied!";
+
+
+    setTimeout(() => {
+
+        button.textContent =
+            "📋 Copy OBS URL";
+
+    }, 1500);
 }
 
 </script>
