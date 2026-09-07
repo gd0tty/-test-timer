@@ -1,138 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>GD0TTY'S Timer Overlay</title>
+
+
 <style>
-html, body {
+
+html,
+body {
+
     margin: 0;
     padding: 0;
+
     width: 100%;
     height: 100%;
+
     background: transparent !important;
+
     overflow: hidden;
 }
 
+
 body {
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
+
 #timer {
+
     display: inline-block;
 
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: 900;
     font-size: 120px;
+
     line-height: 1;
+
+    font-weight: 900;
 
     white-space: nowrap;
 
+    text-align: center;
+
+
+    
+
     background-image: var(--paint);
+
     background-repeat: no-repeat;
 
-    background-size: 100% 100%;
-    background-position: center center;
+    background-position: center;
+
+    background-size: cover;
+
 
     -webkit-background-clip: text;
+
     background-clip: text;
 
+
     color: transparent;
+
     -webkit-text-fill-color: transparent;
 }
+
 </style>
+
 </head>
+
 
 <body>
 
-<div id="timer">00:00</div>
+
+<div id="timer">
+    10:00
+</div>
+
 
 <script>
 
-const params = new URLSearchParams(window.location.search);
 
-const paint = params.get("paint");
-const start = params.get("start") || "00:00";
-const size = params.get("size") || "120";
 
-const timer = document.getElementById("timer");
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
 
-timer.style.fontSize = size + "px";
+
+const paint =
+    params.get("paint");
+
+
+const start =
+    params.get("start") || "10:00";
+
+
+const size =
+    params.get("size") || "120";
+
+
+const font =
+    params.get("font") || "Roboto";
+
+
+const timer =
+    document.getElementById("timer");
+
+
+
+
+const fontEncoded =
+    font
+        .trim()
+        .replace(/\s+/g, "+");
+
+
+const fontLink =
+    document.createElement("link");
+
+
+fontLink.rel =
+    "stylesheet";
+
+
+fontLink.href =
+    "https://fonts.googleapis.com/css2?family=" +
+    fontEncoded +
+    ":wght@100;200;300;400;500;600;700;800;900&display=swap";
+
+
+document.head.appendChild(
+    fontLink
+);
+
+
+timer.style.fontFamily =
+    `"${font}", sans-serif`;
+
+
+timer.style.fontSize =
+    size + "px";
+
 
 
 if (paint) {
+
     timer.style.setProperty(
         "--paint",
-        'url("' + paint + '")'
+        `url("${paint}")`
     );
+
 }
+
 
 
 
 function parseTime(value) {
 
-    const parts = value.split(":").map(Number);
+    const parts =
+        value.split(":").map(Number);
+
 
     if (parts.length === 2) {
-        return parts[0] * 60 + parts[1];
+
+        return (
+            (parts[0] * 60) +
+            parts[1]
+        );
+
     }
 
+
     if (parts.length === 3) {
+
         return (
-            parts[0] * 3600 +
-            parts[1] * 60 +
+            (parts[0] * 3600) +
+            (parts[1] * 60) +
             parts[2]
         );
+
     }
+
 
     return 0;
 }
 
 
-let elapsed = parseTime(start);
-let last = performance.now();
+function formatTime(seconds) {
+
+    seconds =
+        Math.max(
+            0,
+            Math.floor(seconds)
+        );
 
 
-function update() {
+    const hours =
+        Math.floor(seconds / 3600);
 
-    const now = performance.now();
 
-    elapsed += (now - last) / 1000;
+    const minutes =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
 
-    last = now;
 
-    const total = Math.floor(elapsed);
-
-    const hours = Math.floor(total / 3600);
-    const minutes = Math.floor((total % 3600) / 60);
-    const seconds = total % 60;
+    const secs =
+        seconds % 60;
 
 
     if (hours > 0) {
 
-        timer.textContent =
+        return (
             String(hours).padStart(2, "0") +
             ":" +
             String(minutes).padStart(2, "0") +
             ":" +
-            String(seconds).padStart(2, "0");
-
-    } else {
-
-        timer.textContent =
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(seconds).padStart(2, "0");
+            String(secs).padStart(2, "0")
+        );
 
     }
 
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+    );
+}
+
+
+
+
+let remaining =
+    parseTime(start);
+
+
+let last =
+    performance.now();
+
+
+function update() {
+
+    const now =
+        performance.now();
+
+
+    const delta =
+        (now - last) / 1000;
+
+
+    last =
+        now;
+
+
+    if (remaining > 0) {
+
+        remaining -= delta;
+
+
+        if (remaining < 0) {
+
+            remaining = 0;
+
+        }
+
+    }
+
+
+    timer.textContent =
+        formatTime(remaining);
+
+
     requestAnimationFrame(update);
 }
+
 
 update();
 
 </script>
 
 </body>
+
 </html>
