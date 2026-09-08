@@ -1,672 +1,462 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GD0TTY'S TIMER</title>
 
-<title>GD0TTY's Timer</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background:
-        radial-gradient(circle at 20% 20%, rgba(0, 200, 255, .12), transparent 35%),
-        radial-gradient(circle at 80% 80%, rgba(110, 70, 255, .14), transparent 35%),
-        #070b14;
-    color: white;
-}
-
-.container {
-    width: min(1050px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 35px 0 60px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px;
-    align-items: stretch;
-}
-
-.card {
-    background: rgba(15, 21, 35, .9);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 22px;
-    padding: 26px;
-    box-shadow: 0 20px 70px rgba(0,0,0,.3);
-}
-
-.card h2 {
-    margin: 0 0 7px;
-    font-size: 20px;
-}
-
-.description {
-    color: #7f8aa0;
-    font-size: 13px;
-    margin-bottom: 24px;
-}
-
-.input-group {
-    margin-bottom: 18px;
-}
-
-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-input {
-    width: 100%;
-    padding: 14px 15px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.08);
-    background: #0a0f1c;
-    color: white;
-    outline: none;
-    font-family: inherit;
-    font-size: 14px;
-}
-
-input:focus {
-    border-color: #00c8ff;
-    box-shadow: 0 0 0 3px rgba(0,200,255,.08);
-}
-
-input::placeholder {
-    color: #596579;
-}
-
-.generate {
-    width: 100%;
-    padding: 15px;
-    border: 0;
-    border-radius: 13px;
-    color: white;
-    font-size: 15px;
-    font-weight: 800;
-    cursor: pointer;
-    background: linear-gradient(135deg, #00bfff, #675cff);
-    transition: .2s;
-}
-
-.generate:hover {
-    transform: translateY(-2px);
-}
-
-.timer-preview {
-    height: 300px;
-    border-radius: 18px;
-    background: #050811;
-    border: 1px solid rgba(255,255,255,.06);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    overflow: hidden;
-}
-
-.timer {
-    font-size: 90px;
-    font-weight: 900;
-    line-height: 1;
-    white-space: nowrap;
-
-    background-image: none;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    color: white;
-}
-
-.result {
-    display: none;
-    margin-top: 18px;
-}
-
-.result-box {
-    display: flex;
-    gap: 10px;
-}
-
-.result-box input {
-    flex: 1;
-    min-width: 0;
-}
-
-.copy {
-    border: 0;
-    border-radius: 12px;
-    padding: 0 20px;
-    background: #151e30;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.copy:hover {
-    background: #1d2940;
-}
-
-.success {
-    display: none;
-    margin-top: 10px;
-    color: #62e6a5;
-    font-size: 12px;
-}
-
-@media (max-width: 800px) {
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(0, 200, 255, .15), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(120, 70, 255, .15), transparent 35%),
+        #080b12;
+      color: white;
+      padding: 40px 20px;
+    }
 
     .container {
-        width: calc(100% - 25px);
-        padding-top: 20px;
+      width: 100%;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 35px;
     }
 
     .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(18, 23, 35, .85);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 7px;
+      color: #cbd5e1;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #303747;
+      background: #0d111b;
+      color: white;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #22d3ee;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 13px 18px;
+      margin: 5px;
+      color: white;
+      background: linear-gradient(135deg, #06b6d4, #6366f1);
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .output {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background: #0b101a;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 15px;
+      color: #94a3b8;
+    }
+
+    @media(max-width: 750px) {
+      .grid {
         grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
     }
-
-    .timer {
-        font-size: 60px;
-    }
-
-}
-
-</style>
+  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-    <div class="grid">
+  <h1>Timer Generator</h1>
+  <div class="subtitle">Create an OBS timer with 7TV Paint effects</div>
 
-       
+  <div class="grid">
 
-        <div class="card">
+    <div class="card">
 
-            <h2>Timer Settings</h2>
+      <h2>Timer Settings</h2>
 
-            <div class="description">
-                Configure your countdown timer and 7TV Paint.
-            </div>
+      <label>7TV Paint ID or URL</label>
+      <input id="paint" placeholder="Paste 7TV Paint ID or URL">
 
-            <div class="input-group">
+      <label>Google Font</label>
+      <input id="font" value="Arial">
 
-                <label>7TV Paint URL</label>
+      <label>Countdown Time</label>
+      <input id="time" value="10:00">
 
-                <input
-                    id="paintUrl"
-                    type="text"
-                    placeholder="Paste your 7TV Paint URL..."
-                    oninput="updatePreview()"
-                >
+      <label>Font Size</label>
+      <input id="size" type="number" value="150">
 
-            </div>
+      <button onclick="generateTimer()">
+        Generate OBS Timer
+      </button>
 
-            <div class="input-group">
+      <div class="output" id="output">
+        <label>OBS Browser Source URL</label>
+        <input id="obsUrl" readonly>
 
-                <label>Google Font</label>
-
-                <input
-                    id="fontName"
-                    type="text"
-                    value="Roboto"
-                    placeholder="Example: Poppins"
-                    oninput="updateFont()"
-                >
-
-            </div>
-
-            <div class="input-group">
-
-                <label>Countdown Time</label>
-
-                <input
-                    id="startTime"
-                    type="text"
-                    value="10:00"
-                    placeholder="10:00"
-                    oninput="resetPreviewTime()"
-                >
-
-            </div>
-
-            <div class="input-group">
-
-                <label>Font Size</label>
-
-                <input
-                    id="fontSize"
-                    type="number"
-                    value="120"
-                    min="20"
-                    max="500"
-                    oninput="updateSize()"
-                >
-
-            </div>
-
-            <button
-                class="generate"
-                onclick="generateTimer()"
-            >
-                Generate OBS Timer
-            </button>
-
-            <div
-                class="result"
-                id="result"
-            >
-
-                <div class="result-box">
-
-                    <input
-                        id="obsUrl"
-                        type="text"
-                        readonly
-                    >
-
-                    <button
-                        class="copy"
-                        onclick="copyUrl()"
-                    >
-                        Copy
-                    </button>
-
-                </div>
-
-                <div
-                    class="success"
-                    id="success"
-                >
-                    ✓ OBS URL copied!
-                </div>
-
-            </div>
-
-        </div>
-
-
-       
-
-        <div class="card">
-
-            <h2>Live Preview</h2>
-
-            <div class="description">
-                Your Paint is applied directly to the countdown.
-            </div>
-
-            <div class="timer-preview">
-
-                <div
-                    class="timer"
-                    id="timer"
-                >
-                    10:00
-                </div>
-
-            </div>
-
-        </div>
+        <button onclick="copyUrl()">Copy URL</button>
+      </div>
 
     </div>
 
+
+    <div class="card">
+
+      <h2>Timer Controls</h2>
+
+      <div class="controls">
+        <button onclick="startTimer()">▶ Start</button>
+        <button onclick="pauseTimer()">⏸ Pause</button>
+        <button onclick="addTime(10000)">+10 Seconds</button>
+        <button onclick="addTime(-10000)">-10 Seconds</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
+
+      <label>Set Exact Time</label>
+      <input id="exactTime" placeholder="Example: 5:00">
+
+      <button onclick="setExactTime()">
+        Set Time
+      </button>
+
+      <div class="status" id="status">
+        Connecting...
+      </div>
+
+    </div>
+
+  </div>
 </div>
 
 
 <script>
 
+const SUPABASE_URL =
+  "https://hkqieahernxlupambubz.supabase.co";
+
+/*
+  PASTE YOUR SUPABASE PUBLISHABLE KEY BETWEEN THE QUOTES BELOW.
+*/
+const SUPABASE_KEY =
+  "sb_publishable_Ueiqs7cgDOi13Qj9rVL_9g_AfvCB9ht";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-const timer =
-    document.getElementById("timer");
-
-const paintInput =
-    document.getElementById("paintUrl");
-
-const fontInput =
-    document.getElementById("fontName");
-
-const startInput =
-    document.getElementById("startTime");
-
-const sizeInput =
-    document.getElementById("fontSize");
+let timerState = {
+  id: "main",
+  remaining_ms: 600000,
+  running: false,
+  updated_at: new Date().toISOString()
+};
 
 
+function getCurrentRemaining() {
 
+  if (!timerState.running) {
+    return Number(timerState.remaining_ms);
+  }
 
-function updatePreview() {
+  const updated =
+    new Date(timerState.updated_at).getTime();
 
-    const url =
-        paintInput.value.trim();
+  const elapsed =
+    Date.now() - updated;
 
-    if (!url) {
-
-        timer.style.backgroundImage = "none";
-
-        timer.style.color = "white";
-
-        timer.style.webkitTextFillColor = "white";
-
-        return;
-    }
-
-    timer.style.backgroundImage =
-        `url("${url}")`;
-
-    timer.style.color =
-        "transparent";
-
-    timer.style.webkitTextFillColor =
-        "transparent";
+  return Math.max(
+    0,
+    Number(timerState.remaining_ms) - elapsed
+  );
 }
 
 
+async function saveTimer(remaining, running) {
 
+  const row = {
+    id: "main",
+    remaining_ms: Math.max(0, Math.round(remaining)),
+    running: running,
+    updated_at: new Date().toISOString()
+  };
 
-function updateFont() {
+  const { error } =
+    await supabaseClient
+      .from("timers")
+      .upsert(row);
 
-    const font =
-        fontInput.value.trim();
-
-    if (!font) return;
-
-    const old =
-        document.getElementById("googleFont");
-
-    if (old) {
-        old.remove();
-    }
-
-    const link =
-        document.createElement("link");
-
-    link.id =
-        "googleFont";
-
-    link.rel =
-        "stylesheet";
-
-    link.href =
-        "https://fonts.googleapis.com/css2?family=" +
-        font.replace(/\s+/g, "+") +
-        ":wght@100;200;300;400;500;600;700;800;900&display=swap";
-
-    document.head.appendChild(link);
-
-    timer.style.fontFamily =
-        `"${font}", sans-serif`;
+  if (error) {
+    console.error(error);
+    document.getElementById("status").textContent =
+      "Supabase error";
+  }
 }
 
 
+async function startTimer() {
 
+  const remaining =
+    getCurrentRemaining();
 
-function updateSize() {
-
-    const size =
-        sizeInput.value || 120;
-
-    timer.style.fontSize =
-        size + "px";
+  await saveTimer(
+    remaining,
+    true
+  );
 }
 
 
+async function pauseTimer() {
+
+  const remaining =
+    getCurrentRemaining();
+
+  await saveTimer(
+    remaining,
+    false
+  );
+}
+
+
+async function addTime(amount) {
+
+  const remaining =
+    getCurrentRemaining();
+
+  await saveTimer(
+    remaining + amount,
+    timerState.running
+  );
+}
+
+
+async function resetTimer() {
+
+  const time =
+    parseTime(
+      document.getElementById("time").value
+    );
+
+  await saveTimer(
+    time,
+    false
+  );
+}
+
+
+async function setExactTime() {
+
+  const value =
+    document.getElementById("exactTime").value;
+
+  const time =
+    parseTime(value);
+
+  await saveTimer(
+    time,
+    false
+  );
+}
 
 
 function parseTime(value) {
 
-    const parts =
-        value.split(":").map(Number);
+  const parts =
+    value.split(":").map(Number);
 
-    if (parts.length === 2) {
+  if (parts.length === 2) {
 
-        return (
-            (parts[0] * 60) +
-            parts[1]
-        );
-
-    }
-
-    if (parts.length === 3) {
-
-        return (
-            (parts[0] * 3600) +
-            (parts[1] * 60) +
-            parts[2]
-        );
-
-    }
-
-    return 0;
-}
-
-
-function formatTime(seconds) {
-
-    seconds =
-        Math.max(0, Math.floor(seconds));
-
-    const hours =
-        Math.floor(seconds / 3600);
-
-    const minutes =
-        Math.floor((seconds % 3600) / 60);
-
-    const secs =
-        seconds % 60;
-
-
-    if (hours > 0) {
-
-        return (
-            String(hours).padStart(2, "0") +
-            ":" +
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(secs).padStart(2, "0")
-        );
-
-    }
+    const minutes = parts[0] || 0;
+    const seconds = parts[1] || 0;
 
     return (
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(secs).padStart(2, "0")
+      (minutes * 60 + seconds) *
+      1000
     );
+  }
+
+  return 600000;
 }
-
-
-
-
-let remaining =
-    parseTime(startInput.value);
-
-let lastTime =
-    performance.now();
-
-
-function resetPreviewTime() {
-
-    remaining =
-        parseTime(startInput.value);
-
-    lastTime =
-        performance.now();
-
-    timer.textContent =
-        formatTime(remaining);
-}
-
-
-function runTimer() {
-
-    const now =
-        performance.now();
-
-    const delta =
-        (now - lastTime) / 1000;
-
-    lastTime =
-        now;
-
-
-    if (remaining > 0) {
-
-        remaining -= delta;
-
-        if (remaining < 0) {
-            remaining = 0;
-        }
-
-    }
-
-
-    timer.textContent =
-        formatTime(remaining);
-
-
-    requestAnimationFrame(runTimer);
-}
-
-
-runTimer();
-
-
 
 
 function generateTimer() {
 
-    const paint =
-        paintInput.value.trim();
+  const paint =
+    document.getElementById("paint").value.trim();
 
-    if (!paint) {
+  const font =
+    document.getElementById("font").value.trim();
 
-        alert(
-            "Paste your 7TV Paint URL first!"
-        );
+  const size =
+    document.getElementById("size").value;
 
-        return;
-    }
+  const time =
+    document.getElementById("time").value;
 
+  const base =
+    window.location.href
+      .substring(
+        0,
+        window.location.href.lastIndexOf("/") + 1
+      );
 
-    const font =
-        fontInput.value.trim();
+  const url =
+    base +
+    "overlay.html" +
+    "?paint=" +
+    encodeURIComponent(paint) +
+    "&font=" +
+    encodeURIComponent(font) +
+    "&size=" +
+    encodeURIComponent(size) +
+    "&start=" +
+    encodeURIComponent(time) +
+    "&room=main" +
+    "&v=" +
+    Date.now();
 
-    const start =
-        startInput.value.trim();
+  document.getElementById("obsUrl").value = url;
 
-    const size =
-        sizeInput.value;
-
-
-    const overlay =
-        new URL(
-            "overlay.html",
-            window.location.href
-        );
-
-
-    overlay.searchParams.set(
-        "paint",
-        paint
-    );
-
-
-    overlay.searchParams.set(
-        "start",
-        start
-    );
-
-
-    overlay.searchParams.set(
-        "size",
-        size
-    );
-
-
-    overlay.searchParams.set(
-        "font",
-        font
-    );
-
-
-    
-
-    overlay.searchParams.set(
-        "v",
-        Date.now()
-    );
-
-
-    document.getElementById(
-        "obsUrl"
-    ).value =
-        overlay.href;
-
-
-    document.getElementById(
-        "result"
-    ).style.display =
-        "block";
+  document.getElementById("output").style.display =
+    "block";
 }
-
 
 
 function copyUrl() {
 
-    const input =
-        document.getElementById("obsUrl");
+  const input =
+    document.getElementById("obsUrl");
 
-
-    navigator.clipboard.writeText(
-        input.value
-    );
-
-
-    const success =
-        document.getElementById("success");
-
-
-    success.style.display =
-        "block";
-
-
-    setTimeout(() => {
-
-        success.style.display =
-            "none";
-
-    }, 2000);
+  navigator.clipboard.writeText(
+    input.value
+  );
 }
 
 
+supabaseClient
+  .from("timers")
+  .select("*")
+  .eq("id", "main")
+  .single()
+  .then(({ data, error }) => {
+
+    if (data) {
+      timerState = data;
+    }
+
+    document.getElementById("status").textContent =
+      "Connected";
+  });
 
 
-updateFont();
-updateSize();
+supabaseClient
+  .channel("timer-sync")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "timers",
+      filter: "id=eq.main"
+    },
+    payload => {
+
+      if (payload.new) {
+        timerState = payload.new;
+      }
+
+    }
+  )
+  .subscribe();
+
+
+setInterval(() => {
+
+  const remaining =
+    getCurrentRemaining();
+
+  if (
+    timerState.running &&
+    remaining <= 0
+  ) {
+
+    saveTimer(0, false);
+  }
+
+}, 500);
 
 </script>
 
