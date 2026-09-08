@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,55 +5,86 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width,initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-<title>GD0TTY'S Timer</title>
+<title>GD0TTY'S TIMER</title>
+
 
 <style>
 
 html,
-body{
-  margin:0;
-  width:100%;
-  height:100%;
-  background:transparent;
-  overflow:hidden;
+body {
+
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: transparent !important;
+
+    overflow: hidden;
 }
 
-body{
-  display:flex;
-  align-items:center;
-  justify-content:center;
+
+body {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
 }
 
-#timer{
-  font-family:Arial,sans-serif;
-  font-weight:900;
-  font-size:150px;
-  line-height:1;
-  white-space:nowrap;
-  text-align:center;
 
-  background-clip:text;
-  -webkit-background-clip:text;
+#timer {
 
-  color:white;
+    display: inline-block;
 
-  filter:
-    drop-shadow(
-      0 4px 8px rgba(0,0,0,.5)
-    );
+    font-size: 120px;
+
+    line-height: 1;
+
+    font-weight: 900;
+
+    white-space: nowrap;
+
+    text-align: center;
+
+
+   
+    background-image: var(--paint);
+
+    background-repeat: no-repeat;
+
+    background-position: center;
+
+    background-size: cover;
+
+
+    -webkit-background-clip: text;
+
+    background-clip: text;
+
+
+    color: transparent;
+
+    -webkit-text-fill-color: transparent;
 }
 
 </style>
 
 </head>
 
+
 <body>
 
+
 <div id="timer">
-10:00
+    10:00
 </div>
 
 
@@ -63,441 +93,202 @@ body{
 
 
 const params =
-  new URLSearchParams(
-    window.location.search
-  );
+    new URLSearchParams(
+        window.location.search
+    );
 
 
-const paintInput =
-  params.get("paint") || "";
+const paint =
+    params.get("paint");
 
 
-const font =
-  params.get("font") || "Arial";
+const start =
+    params.get("start") || "10:00";
 
 
 const size =
-  params.get("size") || "150";
+    params.get("size") || "120";
 
 
-const startTime =
-  params.get("start") || "10:00";
+const font =
+    params.get("font") || "Roboto";
 
 
 const timer =
-  document.getElementById("timer");
+    document.getElementById("timer");
+
+
+
+
+const fontEncoded =
+    font
+        .trim()
+        .replace(/\s+/g, "+");
+
+
+const fontLink =
+    document.createElement("link");
+
+
+fontLink.rel =
+    "stylesheet";
+
+
+fontLink.href =
+    "https://fonts.googleapis.com/css2?family=" +
+    fontEncoded +
+    ":wght@100;200;300;400;500;600;700;800;900&display=swap";
+
+
+document.head.appendChild(
+    fontLink
+);
 
 
 timer.style.fontFamily =
-  `"${font}",Arial,sans-serif`;
+    `"${font}", sans-serif`;
+
 
 timer.style.fontSize =
-  size + "px";
+    size + "px";
 
 
 
 
-function parseTime(value){
+if (paint) {
 
-  const parts =
-    value.split(":").map(Number);
-
-  if(parts.length !== 2){
-    return 600000;
-  }
-
-  const minutes =
-    Number.isFinite(parts[0])
-      ? parts[0]
-      : 0;
-
-  const seconds =
-    Number.isFinite(parts[1])
-      ? parts[1]
-      : 0;
-
-  return Math.max(
-    0,
-    (minutes * 60 + seconds) * 1000
-  );
-}
-
-
-const duration =
-  parseTime(startTime);
-
-
-const endTime =
-  Date.now() + duration;
-
-
-function formatTime(ms){
-
-  const total =
-    Math.ceil(ms / 1000);
-
-  const minutes =
-    Math.floor(total / 60);
-
-  const seconds =
-    total % 60;
-
-  return (
-    String(minutes).padStart(2,"0") +
-    ":" +
-    String(seconds).padStart(2,"0")
-  );
-}
-
-
-function updateTimer(){
-
-  const remaining =
-    Math.max(
-      0,
-      endTime - Date.now()
+    timer.style.setProperty(
+        "--paint",
+        `url("${paint}")`
     );
 
-  timer.textContent =
-    formatTime(remaining);
 }
 
 
-setInterval(
-  updateTimer,
-  100
-);
 
-updateTimer();
 
+function parseTime(value) {
 
+    const parts =
+        value.split(":").map(Number);
 
 
-function getPaintId(value){
-
-  value = value.trim();
-
-  const match =
-    value.match(/[0-9A-Z]{20,40}/i);
-
-  return match ? match[0] : "";
-}
-
-
-function colorToCSS(color){
-
-  if(typeof color === "string"){
-    return color;
-  }
-
-  if(!color){
-    return "white";
-  }
-
-  let r = color.r ?? 255;
-  let g = color.g ?? 255;
-  let b = color.b ?? 255;
-  let a = color.a ?? 1;
-
-  if(r <= 1 && g <= 1 && b <= 1){
-    r *= 255;
-    g *= 255;
-    b *= 255;
-  }
-
-  if(a > 1){
-    a /= 255;
-  }
-
-  return `rgba(${r},${g},${b},${a})`;
-}
-
-
-function gradientToCSS(gradient){
-
-  if(!gradient){
-    return null;
-  }
-
-  const stops =
-    Array.isArray(gradient.stops)
-      ? gradient.stops
-      : [];
-
-  if(!stops.length){
-    return null;
-  }
-
-  const cssStops =
-    stops.map(stop => {
-
-      const color =
-        colorToCSS(
-          stop.color ?? stop
-        );
-
-      let position = "";
-
-      if(stop.at !== undefined){
-        position =
-          ` ${stop.at * 100}%`;
-      }
-
-      return color + position;
-
-    }).join(",");
-
-
-  const angle =
-    gradient.angle ?? 0;
-
-  const repeat =
-    gradient.repeat === true;
-
-  const fn =
-    String(
-      gradient.function || ""
-    ).toUpperCase();
-
-
-  if(
-    fn.includes("RADIAL") ||
-    fn.includes("CIRCLE")
-  ){
-
-    return (
-      (repeat
-        ? "repeating-radial-gradient"
-        : "radial-gradient") +
-      `(circle,${cssStops})`
-    );
-  }
-
-
-  return (
-    (repeat
-      ? "repeating-linear-gradient"
-      : "linear-gradient") +
-    `(${angle}deg,${cssStops})`
-  );
-}
-
-
-function applyPaint(paint){
-
-  timer.style.backgroundImage =
-    "none";
-
-  timer.style.backgroundColor =
-    "transparent";
-
-  timer.style.color =
-    "white";
-
-  timer.style.webkitTextFillColor =
-    "white";
-
-  timer.style.textShadow =
-    "none";
-
-
-  if(!paint){
-    return;
-  }
-
-
- 
-
-  if(
-    Array.isArray(paint.gradients) &&
-    paint.gradients.length
-  ){
-
-    const gradients =
-      paint.gradients
-        .map(gradientToCSS)
-        .filter(Boolean);
-
-
-    if(gradients.length){
-
-      timer.style.backgroundImage =
-        gradients.join(",");
-
-      timer.style.backgroundClip =
-        "text";
-
-      timer.style.webkitBackgroundClip =
-        "text";
-
-      timer.style.color =
-        "transparent";
-
-      timer.style.webkitTextFillColor =
-        "transparent";
-    }
-  }
-
-
-  
-
-  else if(paint.image_url){
-
-    timer.style.backgroundImage =
-      `url("${paint.image_url}")`;
-
-    timer.style.backgroundSize =
-      "cover";
-
-    timer.style.backgroundPosition =
-      "center";
-
-    timer.style.backgroundRepeat =
-      "no-repeat";
-
-    timer.style.backgroundClip =
-      "text";
-
-    timer.style.webkitBackgroundClip =
-      "text";
-
-    timer.style.color =
-      "transparent";
-
-    timer.style.webkitTextFillColor =
-      "transparent";
-  }
-
-
-  
-
-  else if(paint.color){
-
-    const color =
-      colorToCSS(
-        paint.color
-      );
-
-    timer.style.color =
-      color;
-
-    timer.style.webkitTextFillColor =
-      color;
-  }
-
-
-  
-
-  if(Array.isArray(paint.shadows)){
-
-    const shadows =
-      paint.shadows.map(shadow => {
-
-        const color =
-          colorToCSS(
-            shadow.color
-          );
+    if (parts.length === 2) {
 
         return (
-          `${shadow.x ?? 0}px ` +
-          `${shadow.y ?? 0}px ` +
-          `${shadow.blur ?? 0}px ` +
-          `${color}`
+            (parts[0] * 60) +
+            parts[1]
         );
 
-      });
-
-
-    if(shadows.length){
-
-      timer.style.textShadow =
-        shadows.join(",");
     }
-  }
+
+
+    if (parts.length === 3) {
+
+        return (
+            (parts[0] * 3600) +
+            (parts[1] * 60) +
+            parts[2]
+        );
+
+    }
+
+
+    return 0;
 }
 
 
+function formatTime(seconds) {
+
+    seconds =
+        Math.max(
+            0,
+            Math.floor(seconds)
+        );
 
 
-async function loadPaint(){
-
-  const id =
-    getPaintId(paintInput);
+    const hours =
+        Math.floor(seconds / 3600);
 
 
-  if(!id){
-    return;
-  }
+    const minutes =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
 
 
-  try{
-
-    const response =
-      await fetch(
-        "https://7tv.io/v3/cosmetics"
-      );
+    const secs =
+        seconds % 60;
 
 
-    if(!response.ok){
-      throw new Error(
-        "7TV request failed"
-      );
+    if (hours > 0) {
+
+        return (
+            String(hours).padStart(2, "0") +
+            ":" +
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(secs).padStart(2, "0")
+        );
+
     }
 
 
-    const data =
-      await response.json();
-
-
-    let paints = [];
-
-
-    if(Array.isArray(data)){
-      paints = data;
-    }
-
-    else if(Array.isArray(data.paints)){
-      paints = data.paints;
-    }
-
-    else if(Array.isArray(data.items)){
-      paints = data.items;
-    }
-
-
-    const paint =
-      paints.find(
-        item =>
-          String(item.id).toUpperCase() ===
-          id.toUpperCase()
-      );
-
-
-    if(!paint){
-
-      console.error(
-        "7TV Paint not found:",
-        id
-      );
-
-      return;
-    }
-
-
-    applyPaint(paint);
-
-
-  }catch(error){
-
-    console.error(
-      "7TV Paint Error:",
-      error
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
     );
-  }
 }
 
 
-loadPaint();
+
+
+let remaining =
+    parseTime(start);
+
+
+let last =
+    performance.now();
+
+
+function update() {
+
+    const now =
+        performance.now();
+
+
+    const delta =
+        (now - last) / 1000;
+
+
+    last =
+        now;
+
+
+    if (remaining > 0) {
+
+        remaining -= delta;
+
+
+        if (remaining < 0) {
+
+            remaining = 0;
+
+        }
+
+    }
+
+
+    timer.textContent =
+        formatTime(remaining);
+
+
+    requestAnimationFrame(update);
+}
+
+
+update();
 
 </script>
 
