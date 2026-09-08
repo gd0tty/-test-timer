@@ -1,28 +1,465 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
+<style>
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    background:transparent !important;
+    overflow:hidden;
+}
 
+body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 
+#timer{
+    font-family:Arial,sans-serif;
+    font-weight:900;
+    line-height:1;
+    white-space:nowrap;
 
+    background-clip:text;
+    -webkit-background-clip:text;
 
-<title>GD0TTY'S TIMER</title>
+    color:transparent;
+    -webkit-text-fill-color:transparent;
 
-<style> html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: transparent !important; overflow: hidden; } body { display: flex; align-items: center; justify-content: center; } #timer { display: inline-block; font-size: 120px; line-height: 1; font-weight: 900; white-space: nowrap; text-align: center; color: white; -webkit-text-fill-color: white; background-repeat: no-repeat; background-position: center; background-size: cover; -webkit-background-clip: text; background-clip: text; } </style>
+    background-repeat:no-repeat;
+    background-position:center;
+}
 
+#error{
+    position:fixed;
+    left:50%;
+    bottom:10px;
+    transform:translateX(-50%);
+
+    font-family:Arial,sans-serif;
+    font-size:14px;
+
+    color:white;
+    background:rgba(0,0,0,.75);
+
+    padding:8px 12px;
+    border-radius:7px;
+
+    display:none;
+}
+</style>
 </head>
 
 <body>
 
-<div id="timer"> 10:00 </div>
+<div id="timer">10</div>
+<div id="error"></div>
 
-<script> const params = new URLSearchParams( window.location.search ); const paintInput = params.get("paint"); const start = params.get("start") || "10:00"; const size = params.get("size") || "120"; const font = params.get("font") || "Roboto"; const timer = document.getElementById("timer"); /* ========================= FONT ========================= */ const fontEncoded = font .trim() .replace(/\s+/g, "+"); const fontLink = document.createElement("link"); fontLink.rel = "stylesheet"; fontLink.href = "https://fonts.googleapis.com/css2?family=" + encodeURIComponent(font).replace(/%20/g, "+") + ":wght@100;200;300;400;500;600;700;800;900&display=swap"; document.head.appendChild( fontLink ); timer.style.fontFamily = `"${font}", sans-serif`; timer.style.fontSize = size + "px"; /* ========================= 7TV PAINT ========================= */ function colorToCSS(value) { if (typeof value === "string") { return value; } if (typeof value !== "number") { return "rgba(255,255,255,1)"; } const unsigned = value >>> 0; const r = (unsigned >>> 24) & 255; const g = (unsigned >>> 16) & 255; const b = (unsigned >>> 8) & 255; const a = unsigned & 255; return `rgba(${r}, ${g}, ${b}, ${a / 255})`; } function normalizePaint(paint) { if (!paint) return null; if (paint.data) { return { id: paint.id, ...paint.data }; } return paint; } function gradientToCSS(gradient) { if (!gradient) return null; const fn = String( gradient.function || gradient.type || "" ).toUpperCase(); if (fn === "URL") { if (!gradient.image_url) { return null; } return `url("${gradient.image_url}")`; } const stops = Array.isArray(gradient.stops) ? gradient.stops .map(stop => { const color = colorToCSS( stop.color ); const position = Math.max( 0, Math.min( 100, (Number(stop.at) || 0) * 100 ) ); return ( `${color} ${position}%` ); }) .join(", ") : ""; if (!stops) return null; if (fn === "RADIAL_GRADIENT") { const shape = String( gradient.shape || "circle" ).toLowerCase(); return ( (gradient.repeat ? "repeating-" : "") + `radial-gradient(${shape}, ${stops})` ); } return ( (gradient.repeat ? "repeating-" : "") + `linear-gradient(${Number(gradient.angle) || 0}deg, ${stops})` ); } function applyPaint(paint) { const data = normalizePaint(paint); if (!data) return; let gradients = Array.isArray(data.gradients) ? data.gradients : []; /* Support older/static 7TV Paint format. */ if ( !gradients.length && data.function ) { gradients = [{ function: data.function, angle: data.angle, shape: data.shape, image_url: data.image_url, stops: data.stops || [], repeat: data.repeat || false, canvas_repeat: data.canvas_repeat }]; } const backgrounds = gradients .map(gradientToCSS) .filter(Boolean); if (backgrounds.length) { timer.style.backgroundImage = backgrounds.join(", "); timer.style.backgroundPosition = gradients .map(g => { if ( Array.isArray(g.at) && g.at.length === 2 ) { return ( `${g.at[0] * 100}% ` + `${g.at[1] * 100}%` ); } return "center"; }) .join(", "); timer.style.backgroundSize = gradients .map(g => { if ( Array.isArray(g.size) && g.size.length === 2 ) { return ( `${g.size[0] * 100}% ` + `${g.size[1] * 100}%` ); } return "cover"; }) .join(", "); timer.style.backgroundRepeat = gradients .map(g => g.canvas_repeat || "no-repeat" ) .join(", "); timer.style.color = "transparent"; timer.style.webkitTextFillColor = "transparent"; } else if (data.color) { timer.style.backgroundImage = "none"; timer.style.color = colorToCSS(data.color); timer.style.webkitTextFillColor = colorToCSS(data.color); } /* Text styling contained inside the Paint. */ if (data.text) { if (data.text.weight) { timer.style.fontWeight = String( data.text.weight * 100 ); } if (data.text.stroke) { timer.style.webkitTextStroke = `${data.text.stroke.width || 0}px ` + `${colorToCSS(data.text.stroke.color)}`; } if (data.text.shadows) { timer.style.textShadow = data.text.shadows .map(shadow => { return ( `${shadow.x_offset || 0}px ` + `${shadow.y_offset || 0}px ` + `${shadow.radius || 0}px ` + `${colorToCSS(shadow.color)}` ); }) .join(", "); } if (data.text.transform) { timer.style.textTransform = data.text.transform; } } /* Paint drop shadows. */ if (Array.isArray(data.shadows)) { timer.style.filter = data.shadows .map(shadow => { return ( `drop-shadow(` + `${shadow.x_offset || 0}px ` + `${shadow.y_offset || 0}px ` + `${shadow.radius || 0}px ` + `${colorToCSS(shadow.color)}` + `)` ); }) .join(" "); } } function extractPaintId(value) { if (!value) return null; const input = value.trim(); /* Raw 7TV Paint ID. */ if ( /^[A-Za-z0-9]+$/.test(input) && input.length >= 10 ) { return input; } /* Paint URL. */ try { const url = new URL(input); const parts = url.pathname .split("/") .filter(Boolean); return ( parts[parts.length - 1] || null ); } catch { return null; } } async function loadPaint() { if (!paintInput) return; /* Direct image URL support. */ if ( /^https?:\/\//i.test(paintInput) && !extractPaintId(paintInput) ) { timer.style.backgroundImage = `url("${paintInput}")`; timer.style.color = "transparent"; timer.style.webkitTextFillColor = "transparent"; return; } const id = extractPaintId( paintInput ); if (!id) return; try { const response = await fetch( "https://7tv.io/v3/cosmetics" ); if (!response.ok) { throw new Error( "7TV request failed" ); } const json = await response.json(); let paints = []; if (Array.isArray(json)) { paints = json; } else if ( Array.isArray(json.paints) ) { paints = json.paints; } else if ( json.cosmetics && Array.isArray( json.cosmetics.paints ) ) { paints = json.cosmetics.paints; } const paint = paints.find( item => String(item.id) === String(id) ); if (!paint) { throw new Error( "Paint not found" ); } applyPaint(paint); } catch (error) { console.error( "7TV Paint error:", error ); } } /* ========================= TIMER ========================= */ function parseTime(value) { const parts = value .split(":") .map(Number); if (parts.length === 2) { return ( parts[0] * 60 + parts[1] ); } if (parts.length === 3) { return ( parts[0] * 3600 + parts[1] * 60 + parts[2] ); } return 0; } function formatTime(seconds) { seconds = Math.max( 0, Math.floor(seconds) ); const hours = Math.floor( seconds / 3600 ); const minutes = Math.floor( (seconds % 3600) / 60 ); const secs = seconds % 60; if (hours > 0) { return ( String(hours).padStart(2, "0") + ":" + String(minutes).padStart(2, "0") + ":" + String(secs).padStart(2, "0") ); } return ( String(minutes).padStart(2, "0") + ":" + String(secs).padStart(2, "0") ); } let remaining = parseTime(start); let last = performance.now(); function update() { const now = performance.now(); const delta = (now - last) / 1000; last = now; if (remaining > 0) { remaining -= delta; if (remaining < 0) { remaining = 0; } } timer.textContent = formatTime( remaining ); requestAnimationFrame( update ); } /* ========================= START ========================= */ loadPaint(); update(); </script>
+<script>
 
-</body> </html>
+const API =
+    "https://api.7tv.dev/v3/gql";
+
+const params =
+    new URLSearchParams(window.location.search);
+
+const paintId =
+    params.get("paint") || "";
+
+const startTime =
+    Date.now();
+
+const duration =
+    Math.max(
+        1,
+        parseInt(params.get("time") || "10")
+    );
+
+const fontSize =
+    Math.max(
+        10,
+        parseInt(params.get("size") || "120")
+    );
+
+const font =
+    params.get("font") || "Arial";
+
+const timer =
+    document.getElementById("timer");
+
+const errorBox =
+    document.getElementById("error");
+
+timer.style.fontSize =
+    `${fontSize}px`;
+
+timer.style.fontFamily =
+    font;
+
+function showError(message){
+
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+
+}
+
+const paintQuery = `
+query {
+    paints {
+        paints {
+            id
+            name
+            data {
+                layers {
+                    id
+                    opacity
+                    ty {
+                        __typename
+
+                        ... on PaintLayerTypeSingleColor {
+                            color {
+                                r
+                                g
+                                b
+                                a
+                                hex
+                            }
+                        }
+
+                        ... on PaintLayerTypeLinearGradient {
+                            angle
+                            repeating
+                            stops {
+                                at
+                                color {
+                                    r
+                                    g
+                                    b
+                                    a
+                                    hex
+                                }
+                            }
+                        }
+
+                        ... on PaintLayerTypeRadialGradient {
+                            repeating
+                            shape
+                            stops {
+                                at
+                                color {
+                                    r
+                                    g
+                                    b
+                                    a
+                                    hex
+                                }
+                            }
+                        }
+
+                        ... on PaintLayerTypeImage {
+                            images {
+                                url
+                                width
+                                height
+                                mime
+                            }
+                        }
+                    }
+                }
+
+                shadows {
+                    blur
+                    offsetX
+                    offsetY
+                    color {
+                        r
+                        g
+                        b
+                        a
+                        hex
+                    }
+                }
+            }
+        }
+    }
+}
+`;
+
+function rgba(color,opacity=1){
+
+    if(!color){
+        return "rgba(255,255,255,1)";
+    }
+
+    const a =
+        typeof color.a === "number"
+            ? color.a / 255
+            : 1;
+
+    return `rgba(
+        ${color.r || 0},
+        ${color.g || 0},
+        ${color.b || 0},
+        ${Math.max(0,Math.min(1,a * opacity))}
+    )`;
+}
+
+function layerToCSS(layer){
+
+    const opacity =
+        typeof layer.opacity === "number"
+            ? layer.opacity
+            : 1;
+
+    const type =
+        layer.ty;
+
+    if(!type) return null;
+
+    if(type.__typename === "PaintLayerTypeSingleColor"){
+
+        const c =
+            rgba(type.color,opacity);
+
+        return {
+            image:`linear-gradient(${c},${c})`,
+            size:"100% 100%",
+            repeat:"no-repeat"
+        };
+    }
+
+    if(type.__typename === "PaintLayerTypeLinearGradient"){
+
+        const stops =
+            (type.stops || [])
+                .map(stop =>
+                    `${rgba(stop.color,opacity)} ${stop.at * 100}%`
+                )
+                .join(",");
+
+        const fn =
+            type.repeating
+                ? "repeating-linear-gradient"
+                : "linear-gradient";
+
+        return {
+            image:`${fn}(${type.angle || 0}deg,${stops})`,
+            size:"100% 100%",
+            repeat:"no-repeat"
+        };
+    }
+
+    if(type.__typename === "PaintLayerTypeRadialGradient"){
+
+        const stops =
+            (type.stops || [])
+                .map(stop =>
+                    `${rgba(stop.color,opacity)} ${stop.at * 100}%`
+                )
+                .join(",");
+
+        const fn =
+            type.repeating
+                ? "repeating-radial-gradient"
+                : "radial-gradient";
+
+        const shape =
+            type.shape === "ELLIPSE"
+                ? "ellipse"
+                : "circle";
+
+        return {
+            image:`${fn}(${shape},${stops})`,
+            size:"100% 100%",
+            repeat:"no-repeat"
+        };
+    }
+
+    if(type.__typename === "PaintLayerTypeImage"){
+
+        const image =
+            type.images &&
+            type.images.length
+                ? type.images[0]
+                : null;
+
+        if(!image) return null;
+
+        return {
+            image:`url("${image.url}")`,
+            size:"cover",
+            repeat:"no-repeat"
+        };
+    }
+
+    return null;
+}
+
+function applyPaint(paint){
+
+    const layers =
+        paint?.data?.layers || [];
+
+    const rendered =
+        layers
+            .map(layerToCSS)
+            .filter(Boolean);
+
+    timer.style.backgroundImage =
+        rendered.length
+            ? rendered.map(x=>x.image).join(",")
+            : "none";
+
+    timer.style.backgroundSize =
+        rendered.length
+            ? rendered.map(x=>x.size).join(",")
+            : "100% 100%";
+
+    timer.style.backgroundRepeat =
+        rendered.length
+            ? rendered.map(x=>x.repeat).join(",")
+            : "no-repeat";
+
+    timer.style.backgroundPosition =
+        rendered.length
+            ? rendered.map(()=> "center").join(",")
+            : "center";
+
+    const shadows =
+        paint?.data?.shadows || [];
+
+    if(shadows.length){
+
+        timer.style.filter =
+            shadows.map(shadow =>
+                `drop-shadow(
+                    ${shadow.offsetX || 0}px
+                    ${shadow.offsetY || 0}px
+                    ${shadow.blur || 0}px
+                    ${rgba(shadow.color)}
+                )`
+            ).join(" ");
+
+    }else{
+
+        timer.style.filter =
+            "none";
+    }
+}
+
+async function loadPaint(){
+
+    if(!paintId){
+
+        showError("No 7TV Paint ID.");
+        return;
+    }
+
+    try{
+
+        const response =
+            await fetch(API,{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json",
+                    "Accept":"application/json"
+                },
+                body:JSON.stringify({
+                    query:paintQuery
+                })
+            });
+
+        if(!response.ok){
+
+            throw new Error(
+                `7TV API HTTP ${response.status}`
+            );
+        }
+
+        const json =
+            await response.json();
+
+        if(json.errors?.length){
+
+            throw new Error(
+                json.errors
+                    .map(e=>e.message)
+                    .join(", ")
+            );
+        }
+
+        const paints =
+            json?.data?.paints?.paints || [];
+
+        const paint =
+            paints.find(
+                p =>
+                    String(p.id).toLowerCase()
+                    === String(paintId).toLowerCase()
+            );
+
+        if(!paint){
+
+            throw new Error(
+                "Paint ID not found"
+            );
+        }
+
+        applyPaint(paint);
+
+    }catch(error){
+
+        console.error(error);
+
+        showError(
+            "7TV Paint failed to load"
+        );
+
+        
+
+        timer.style.backgroundImage =
+            "linear-gradient(white,white)";
+    }
+}
+
+function updateTimer(){
+
+    const elapsed =
+        Math.floor(
+            (Date.now() - startTime) / 1000
+        );
+
+    const remaining =
+        Math.max(
+            0,
+            duration - elapsed
+        );
+
+    timer.textContent =
+        remaining;
+
+    if(remaining <= 0){
+
+        clearInterval(interval);
+    }
+}
+
+loadPaint();
+
+updateTimer();
+
+const interval =
+    setInterval(
+        updateTimer,
+        250
+    );
+
+</script>
+
+</body>
+</html>
