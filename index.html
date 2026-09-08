@@ -175,6 +175,25 @@ input::placeholder {
     font-size: 12px;
 }
 
+/* 7Database link */
+
+.database-link {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 13px;
+    color: #7f8aa0;
+}
+
+.database-link a {
+    color: #00c8ff;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.database-link a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 800px) {
 
     .container {
@@ -326,6 +345,19 @@ input::placeholder {
 
         </div>
 
+    </div>
+
+    <!-- 7Database -->
+
+    <div class="database-link">
+        Check out this website to get your Paint IDs to customize your timer:
+        <a
+            href="https://7database.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            7Database
+        </a>
     </div>
 
 </div>
@@ -696,7 +728,6 @@ function convertPaintLayer(layer) {
             type.images || [];
 
 
-        
         const image =
             images
                 .slice()
