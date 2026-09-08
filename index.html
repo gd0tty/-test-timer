@@ -71,7 +71,7 @@ label {
     margin-bottom: 8px;
 }
 
-input {
+input, select {
     width: 100%;
     padding: 14px 15px;
     border-radius: 12px;
@@ -83,7 +83,7 @@ input {
     font-size: 14px;
 }
 
-input:focus {
+input:focus, select:focus {
     border-color: #00c8ff;
     box-shadow: 0 0 0 3px rgba(0,200,255,.08);
 }
@@ -175,11 +175,41 @@ input::placeholder {
     font-size: 12px;
 }
 
+/* Row Layout for Help and Sound Picker */
+
+.help-sound-row {
+    margin-top: 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.sound-picker-container {
+    background: rgba(15, 21, 35, .9);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 57px;
+}
+
+.sound-picker-container label {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.sound-picker-container select {
+    padding: 8px 12px;
+    width: auto;
+    cursor: pointer;
+}
 
 /* 7TV Paint ID Help */
 
 .paint-help {
-    margin-top: 22px;
     background: rgba(15, 21, 35, .9);
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
@@ -246,7 +276,6 @@ input::placeholder {
     border: 1px solid rgba(255,255,255,.08);
 }
 
-
 /* 7Database preview */
 
 .database-preview {
@@ -302,7 +331,6 @@ input::placeholder {
     font-weight: 800;
 }
 
-
 @media (max-width: 800px) {
 
     .container {
@@ -333,6 +361,15 @@ input::placeholder {
 
     .paint-help-body {
         max-width: 100%;
+    }
+
+    .help-sound-row {
+        flex-direction: column;
+    }
+
+    .sound-picker-container {
+        width: 100%;
+        justify-content: space-between;
     }
 
 }
@@ -475,33 +512,46 @@ input::placeholder {
     </div>
 
 
-    <!-- 7TV PAINT ID HELP -->
+    <div class="help-sound-row">
 
-    <details class="paint-help">
+        <details class="paint-help">
 
-        <summary>
-            How do i copy the 7TV Paint ID
-        </summary>
+            <summary>
+                How do i copy the 7TV Paint ID
+            </summary>
 
-        <div class="paint-help-content">
+            <div class="paint-help-content">
 
-            <div class="paint-help-body">
+                <div class="paint-help-body">
 
-                <p>
-                    Follow the steps shown in the GIF below to copy your 7TV Paint ID.
-                </p>
+                    <p>
+                        Follow the steps shown in the GIF below to copy your 7TV Paint ID.
+                    </p>
 
-                <img
-                    class="paint-help-gif"
-                    src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
-                    alt="How to copy a 7TV Paint ID"
-                >
+                    <img
+                        class="paint-help-gif"
+                        src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
+                        alt="How to copy a 7TV Paint ID"
+                    >
+
+                </div>
 
             </div>
 
+        </details>
+
+        <div class="sound-picker-container">
+            <label for="finishSound">Timer Finish Sound:</label>
+            <select id="finishSound">
+                <option value="none">None</option>
+                <option value="chime">Chime</option>
+                <option value="bell">Bell</option>
+                <option value="buzzer">Buzzer</option>
+                <option value="alarm">Alarm</option>
+            </select>
         </div>
 
-    </details>
+    </div>
 
 
     <div class="database-preview">
@@ -659,6 +709,9 @@ const startInput =
 
 const sizeInput =
     document.getElementById("fontSize");
+
+const soundSelect =
+    document.getElementById("finishSound");
 
 
 function extractPaintId(value) {
@@ -1521,6 +1574,9 @@ function generateTimer() {
     const size =
         sizeInput.value;
 
+    const sound =
+        soundSelect.value;
+
 
     const overlay =
         new URL(
@@ -1550,6 +1606,11 @@ function generateTimer() {
     overlay.searchParams.set(
         "font",
         font
+    );
+
+    overlay.searchParams.set(
+        "sound",
+        sound
     );
 
 
