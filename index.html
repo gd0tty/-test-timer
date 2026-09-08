@@ -226,13 +226,25 @@ input::placeholder {
     line-height: 1.5;
 }
 
-.paint-help-gif {
-    display: block;
-    width: 30%;
-    max-width: 220px;
+
+/* GIF CROPPED BOX */
+
+.paint-help-gif-box {
+    width: 260px;
+    height: 190px;
     margin: 0 auto;
+    overflow: hidden;
     border-radius: 9px;
     border: 1px solid rgba(255,255,255,.08);
+    background: #080d18;
+}
+
+.paint-help-gif {
+    display: block;
+    width: auto;
+    height: 190px;
+    max-width: none;
+    margin: 0;
 }
 
 
@@ -469,11 +481,15 @@ input::placeholder {
                 Follow the steps shown in the GIF below to copy your 7TV Paint ID.
             </p>
 
-            <img
-                class="paint-help-gif"
-                src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
-                alt="How to copy a 7TV Paint ID"
-            >
+            <div class="paint-help-gif-box">
+
+                <img
+                    class="paint-help-gif"
+                    src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
+                    alt="How to copy a 7TV Paint ID"
+                >
+
+            </div>
 
         </div>
 
