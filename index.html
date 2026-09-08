@@ -260,14 +260,25 @@ input::placeholder {
     padding-top: 12px;
 }
 
-.notice-box {
-    font-size: 11px;
-    color: #9aa5b8;
-    line-height: 1.4;
-    background: rgba(0,0,0,.2);
-    padding: 8px 12px;
+.file-upload-btn {
+    display: inline-block;
+    padding: 10px 14px;
+    background: #151e30;
+    border: 1px solid rgba(255,255,255,.1);
     border-radius: 8px;
-    border-left: 3px solid #00c8ff;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: center;
+    transition: .2s;
+}
+
+.file-upload-btn:hover {
+    background: #1d2940;
+    border-color: #00c8ff;
+}
+
+.file-upload-btn input {
+    display: none;
 }
 
 .selected-file-display {
@@ -586,7 +597,7 @@ input::placeholder {
                     <option value="bell">Bell</option>
                     <option value="buzzer">Buzzer</option>
                     <option value="alarm">Alarm</option>
-                    <option value="custom">Custom MP3 / WAV URL</option>
+                    <option value="custom">Custom MP3 / WAV</option>
                 </select>
             </div>
 
@@ -599,10 +610,13 @@ input::placeholder {
             </div>
 
             <div class="custom-sound-inputs" id="customSoundContainer">
-                <input type="text" id="customAudioUrl" placeholder="Paste direct audio URL (e.g. https://.../sound.mp3)" oninput="playCustomAudioUrl(this.value)">
-                <div class="notice-box">
-                    💡 <strong>Note:</strong> OBS limits URL lengths. Use a direct web link to an <code>.mp3</code>, <code>.wav</code>, or <code>.ogg</code> file (like Discord attachment links or Catbox.moe).
-                </div>
+                <input type="text" id="customAudioUrl" placeholder="Paste direct audio URL..." oninput="playCustomAudioUrl(this.value)">
+                
+                <label class="file-upload-btn" id="uploadLabel">
+                    📁 Choose Audio File (.mp3 / .wav / .ogg)
+                    <input type="file" id="customAudioFile" accept="audio/*" onchange="handleFileUpload(event)">
+                </label>
+                
                 <div id="fileDisplay" class="selected-file-display"></div>
             </div>
         </div>
@@ -687,6 +701,7 @@ const customAudioUrlInput = document.getElementById("customAudioUrl");
 const fileDisplay = document.getElementById("fileDisplay");
 const playPauseBtn = document.getElementById("playPauseBtn");
 const volumeControl = document.getElementById("volumeControl");
+const uploadLabel = document.getElementById("uploadLabel");
 
 let currentAudioElement = null;
 let audioCtx = null;
@@ -788,6 +803,35 @@ function handleSoundSelection(soundType) {
         if (soundType !== 'none') {
             previewSound(soundType);
         }
+    }
+}
+
+async function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    fileDisplay.textContent = "⏳ Hosting audio file to prevent OBS URL error...";
+    
+    const formData = new FormData();
+    formData.append("reqtype", "fileupload");
+    formData.append("fileToUpload", file);
+
+    try {
+        const response = await fetch("https://catbox.moe/user/api.php", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            const uploadedUrl = await response.text();
+            customAudioUrlInput.value = uploadedUrl.trim();
+            fileDisplay.textContent = `✓ Uploaded: ${file.name}`;
+            playAudioWithBoost(uploadedUrl.trim());
+        } else {
+            throw new Error("Upload failed");
+        }
+    } catch (err) {
+        fileDisplay.textContent = "❌ Failed to host file. Try pasting a link directly.";
     }
 }
 
@@ -1101,7 +1145,7 @@ function generateTimer() {
     if (sound === 'custom') {
         customSoundSource = customAudioUrlInput.value.trim();
         if (!customSoundSource) {
-            alert("Please paste a direct audio URL!");
+            alert("Please upload a file or paste an audio URL!");
             return;
         }
     }
