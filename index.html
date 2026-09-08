@@ -260,32 +260,11 @@ input::placeholder {
     padding-top: 12px;
 }
 
-.file-upload-btn {
-    display: inline-block;
-    padding: 10px 14px;
-    background: #151e30;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    text-align: center;
-    transition: .2s;
-}
-
-.file-upload-btn:hover {
-    background: #1d2940;
-    border-color: #00c8ff;
-}
-
-.file-upload-btn input {
-    display: none;
-}
-
 .selected-file-display {
     font-size: 12px;
     color: #00c8ff;
     font-weight: 700;
-    margin-top: 4px;
+    margin-top: 2px;
     word-break: break-all;
 }
 
@@ -621,12 +600,6 @@ input::placeholder {
 
             <div class="custom-sound-inputs" id="customSoundContainer">
                 <input type="text" id="customAudioUrl" placeholder="Paste direct audio or YouTube URL..." oninput="playCustomAudioUrl(this.value)">
-                
-                <label class="file-upload-btn" id="uploadLabel">
-                    📁 Choose Audio File (.mp3 / .wav / .ogg)
-                    <input type="file" id="customAudioFile" accept="audio/*" onchange="handleFileUpload(event)">
-                </label>
-                
                 <div id="fileDisplay" class="selected-file-display"></div>
             </div>
         </div>
@@ -882,35 +855,6 @@ function handleSoundSelection(soundType) {
         if (soundType !== 'none') {
             previewSound(soundType);
         }
-    }
-}
-
-async function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    fileDisplay.textContent = "⏳ Hosting audio file to prevent OBS URL error...";
-    
-    const formData = new FormData();
-    formData.append("reqtype", "fileupload");
-    formData.append("fileToUpload", file);
-
-    try {
-        const response = await fetch("https://catbox.moe/user/api.php", {
-            method: "POST",
-            body: formData
-        });
-
-        if (response.ok) {
-            const uploadedUrl = await response.text();
-            customAudioUrlInput.value = uploadedUrl.trim();
-            fileDisplay.textContent = `✓ Uploaded: ${file.name}`;
-            playAudioWithBoost(uploadedUrl.trim());
-        } else {
-            throw new Error("Upload failed");
-        }
-    } catch (err) {
-        fileDisplay.textContent = "❌ Failed to host file. Try pasting a link directly.";
     }
 }
 
@@ -1230,7 +1174,7 @@ function generateTimer() {
     if (sound === 'custom') {
         customSoundSource = customAudioUrlInput.value.trim();
         if (!customSoundSource) {
-            alert("Please upload a file or paste an audio/YouTube URL!");
+            alert("Please paste an audio or YouTube URL!");
             return;
         }
     }
