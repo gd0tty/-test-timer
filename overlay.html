@@ -81,8 +81,52 @@ const font =
 const timer =
     document.getElementById("timer");
 
+// --- AUDIO SYSTEM SETUP ---
+let audioCtx = null;
 
+function initAudio() {
+    if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            audioCtx = new AudioContext();
+        }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
 
+// User interaction listener to satisfy browser autoplay policies
+window.addEventListener('click', initAudio, { once: true });
+
+function playEndSound() {
+    initAudio();
+    if (!audioCtx) return;
+
+    // Futuristic synth finish chime: C5 -> G5 -> C6
+    const notes = [523.25, 783.99, 1046.50];
+
+    notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        const startTime = audioCtx.currentTime + (index * 0.12);
+        const duration = 0.5;
+
+        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+    });
+}
+// --- END AUDIO SYSTEM ---
 
 const fontEncoded =
     font
@@ -107,12 +151,8 @@ timer.style.fontFamily =
 timer.style.fontSize =
     size + "px";
 
-
-
-
 const SEVENTV_API =
     "https://7tv.io/v4/gql";
-
 
 const PAINT_QUERY = `
 query {
@@ -216,9 +256,6 @@ query {
 }
 `;
 
-
-
-
 function colorToCss(color) {
 
     if (!color) {
@@ -240,9 +277,6 @@ function colorToCss(color) {
     return `rgba(${r},${g},${b},${a})`;
 }
 
-
-
-
 function convertPaintLayer(layer) {
 
     if (!layer || !layer.ty) {
@@ -254,9 +288,6 @@ function convertPaintLayer(layer) {
 
     const opacity =
         layer.opacity ?? 1;
-
-
-    
 
     if (
         type ===
@@ -275,9 +306,6 @@ function convertPaintLayer(layer) {
             opacity
         };
     }
-
-
-
 
     if (
         type ===
@@ -313,9 +341,6 @@ function convertPaintLayer(layer) {
         };
     }
 
-
-   
-
     if (
         type ===
         "PaintLayerTypeRadialGradient"
@@ -346,9 +371,6 @@ function convertPaintLayer(layer) {
             opacity
         };
     }
-
-
-
 
     if (
         type ===
@@ -390,12 +412,8 @@ function convertPaintLayer(layer) {
         };
     }
 
-
     return null;
 }
-
-
-
 
 async function loadPaint() {
 
@@ -423,17 +441,14 @@ async function loadPaint() {
                 }
             );
 
-
         if (!response.ok) {
             throw new Error(
                 "7TV API request failed"
             );
         }
 
-
         const result =
             await response.json();
-
 
         const paints =
             result
@@ -441,13 +456,11 @@ async function loadPaint() {
                 ?.paints
                 ?.paints || [];
 
-
         const paint =
             paints.find(
                 p =>
                     p.id === paintId
             );
-
 
         if (!paint) {
 
@@ -459,19 +472,15 @@ async function loadPaint() {
             return;
         }
 
-
         const layers =
             paint
                 ?.data
                 ?.layers || [];
 
-
         const backgrounds = [];
-
 
         const sizes = [];
         const repeats = [];
-
 
         for (
             const layer of layers
@@ -482,27 +491,22 @@ async function loadPaint() {
                     layer
                 );
 
-
             if (!converted) {
                 continue;
             }
-
 
             backgrounds.push(
                 converted.image
             );
 
-
             sizes.push(
                 converted.size
             );
-
 
             repeats.push(
                 converted.repeat
             );
         }
-
 
         if (backgrounds.length) {
 
@@ -532,8 +536,6 @@ async function loadPaint() {
             error
         );
 
-       
-
         timer.style.color =
             "white";
 
@@ -542,16 +544,12 @@ async function loadPaint() {
     }
 }
 
-
-
-
 function parseTime(value) {
 
     const parts =
         value
             .split(":")
             .map(Number);
-
 
     if (parts.length === 2) {
 
@@ -560,7 +558,6 @@ function parseTime(value) {
             parts[1]
         );
     }
-
 
     if (parts.length === 3) {
 
@@ -571,10 +568,8 @@ function parseTime(value) {
         );
     }
 
-
     return 0;
 }
-
 
 function formatTime(seconds) {
 
@@ -584,22 +579,18 @@ function formatTime(seconds) {
             Math.floor(seconds)
         );
 
-
     const hours =
         Math.floor(
             seconds / 3600
         );
-
 
     const minutes =
         Math.floor(
             (seconds % 3600) / 60
         );
 
-
     const secs =
         seconds % 60;
-
 
     if (hours > 0) {
 
@@ -615,7 +606,6 @@ function formatTime(seconds) {
         );
     }
 
-
     return (
         String(minutes)
             .padStart(2, "0") +
@@ -625,51 +615,45 @@ function formatTime(seconds) {
     );
 }
 
-
 let remaining =
     parseTime(start);
-
 
 let last =
     performance.now();
 
+let hasPlayedSound = false;
 
 function update() {
 
     const now =
         performance.now();
 
-
     const delta =
         (now - last) / 1000;
 
-
     last =
         now;
-
 
     if (remaining > 0) {
 
         remaining -= delta;
 
-
-        if (remaining < 0) {
+        if (remaining <= 0) {
             remaining = 0;
+            if (!hasPlayedSound) {
+                playEndSound();
+                hasPlayedSound = true;
+            }
         }
     }
 
-
     timer.textContent =
         formatTime(remaining);
-
 
     requestAnimationFrame(
         update
     );
 }
-
-
-
 
 loadPaint();
 
