@@ -208,6 +208,49 @@ input::placeholder {
     cursor: pointer;
 }
 
+.audio-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.play-btn {
+    padding: 8px 16px;
+    background: #151e30;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.play-btn:hover {
+    background: #00c8ff;
+    color: #000;
+}
+
+.volume-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.volume-container label {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.volume-container input[type="range"] {
+    padding: 0;
+    height: 6px;
+    cursor: pointer;
+    accent-color: #00c8ff;
+}
+
 .custom-sound-inputs {
     display: none;
     flex-direction: column;
@@ -558,6 +601,14 @@ input::placeholder {
                 </select>
             </div>
 
+            <div class="audio-controls-row">
+                <button id="playPauseBtn" class="play-btn" onclick="togglePlayPause()">▶ Play</button>
+                <div class="volume-container">
+                    <label for="volumeControl">🔊</label>
+                    <input type="range" id="volumeControl" min="0" max="1" step="0.05" value="1" oninput="updateVolume(this.value)">
+                </div>
+            </div>
+
             <div class="custom-sound-inputs" id="customSoundContainer">
                 <input type="text" id="customAudioUrl" placeholder="Paste Direct Audio URL (.mp3 / .wav)..." onchange="playCustomAudioUrl(this.value)">
                 
@@ -648,10 +699,15 @@ const soundSelect = document.getElementById("finishSound");
 const customContainer = document.getElementById("customSoundContainer");
 const customAudioUrlInput = document.getElementById("customAudioUrl");
 const fileDisplay = document.getElementById("fileDisplay");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const volumeControl = document.getElementById("volumeControl");
 
 let customAudioDataUrl = "";
 let currentAudioElement = null;
 let audioCtx = null;
+let currentGainNode = null;
+let isPlayingPreset = false;
+let presetTimers = [];
 
 function getAudioContext() {
     if (!audioCtx) {
@@ -664,10 +720,53 @@ function getAudioContext() {
 }
 
 function stopCurrentAudio() {
+    presetTimers.forEach(t => clearTimeout(t));
+    presetTimers = [];
+    isPlayingPreset = false;
+
     if (currentAudioElement) {
         currentAudioElement.pause();
         currentAudioElement.currentTime = 0;
         currentAudioElement = null;
+    }
+    playPauseBtn.textContent = "▶ Play";
+}
+
+function updateVolume(val) {
+    const volume = parseFloat(val);
+    if (currentGainNode) {
+        currentGainNode.gain.value = volume;
+    }
+    if (currentAudioElement) {
+        currentAudioElement.volume = volume;
+    }
+}
+
+function togglePlayPause() {
+    const soundType = soundSelect.value;
+    if (soundType === 'none') return;
+
+    if (soundType === 'custom') {
+        const audioUrl = customAudioDataUrl || customAudioUrlInput.value.trim();
+        if (!audioUrl) return;
+
+        if (currentAudioElement) {
+            if (currentAudioElement.paused) {
+                currentAudioElement.play();
+                playPauseBtn.textContent = "⏸ Pause";
+            } else {
+                currentAudioElement.pause();
+                playPauseBtn.textContent = "▶ Play";
+            }
+        } else {
+            playAudioWithBoost(audioUrl);
+        }
+    } else {
+        if (isPlayingPreset) {
+            stopCurrentAudio();
+        } else {
+            previewSound(soundType);
+        }
     }
 }
 
@@ -676,21 +775,19 @@ function playAudioWithBoost(audioUrl) {
     
     stopCurrentAudio();
     
-    const ctx = getAudioContext();
     const audio = new Audio(audioUrl);
     audio.crossOrigin = "anonymous";
-    audio.loop = false; // Prevents endless looping
-    
-    const source = ctx.createMediaElementSource(audio);
-    const gainNode = ctx.createGain();
-    
-    gainNode.gain.value = 2.0; // Boosted volume
-    
-    source.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    
+    audio.loop = false;
+    audio.volume = parseFloat(volumeControl.value);
+
+    audio.onended = () => {
+        playPauseBtn.textContent = "▶ Play";
+    };
+
     currentAudioElement = audio;
-    audio.play().catch(e => console.log("Audio playback:", e));
+    audio.play().then(() => {
+        playPauseBtn.textContent = "⏸ Pause";
+    }).catch(e => console.log("Audio playback error:", e));
 }
 
 function handleSoundSelection(soundType) {
@@ -703,7 +800,9 @@ function handleSoundSelection(soundType) {
         }
     } else {
         customContainer.style.display = 'none';
-        previewSound(soundType);
+        if (soundType !== 'none') {
+            previewSound(soundType);
+        }
     }
 }
 
@@ -716,7 +815,7 @@ function handleFileUpload(e) {
     const reader = new FileReader();
     reader.onload = function(evt) {
         customAudioDataUrl = evt.target.result;
-        customAudioUrlInput.value = ""; // Clear text field if file uploaded
+        customAudioUrlInput.value = "";
         playAudioWithBoost(customAudioDataUrl);
     };
     reader.readAsDataURL(file);
@@ -736,12 +835,19 @@ function previewSound(soundType) {
     stopCurrentAudio();
     const ctx = getAudioContext();
     const now = ctx.currentTime;
+    const vol = parseFloat(volumeControl.value);
     
-    const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(2.0, now);
-    masterGain.connect(ctx.destination);
+    currentGainNode = ctx.createGain();
+    currentGainNode.gain.setValueAtTime(vol, now);
+    currentGainNode.connect(ctx.destination);
+
+    isPlayingPreset = true;
+    playPauseBtn.textContent = "⏸ Pause";
+
+    let duration = 0.6;
 
     if (soundType === 'chime') {
+        duration = 0.84;
         [523.25, 659.25, 783.99].forEach((freq, i) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -750,12 +856,13 @@ function previewSound(soundType) {
             gain.gain.setValueAtTime(0.3, now + i * 0.08);
             gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.6);
             osc.connect(gain);
-            gain.connect(masterGain);
+            gain.connect(currentGainNode);
             osc.start(now + i * 0.08);
             osc.stop(now + i * 0.08 + 0.6);
         });
     } 
     else if (soundType === 'bell') {
+        duration = 1.2;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
@@ -763,11 +870,12 @@ function previewSound(soundType) {
         gain.gain.setValueAtTime(0.5, now);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
         osc.connect(gain);
-        gain.connect(masterGain);
+        gain.connect(currentGainNode);
         osc.start(now);
         osc.stop(now + 1.2);
     } 
     else if (soundType === 'buzzer') {
+        duration = 0.4;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sawtooth';
@@ -775,11 +883,12 @@ function previewSound(soundType) {
         gain.gain.setValueAtTime(0.4, now);
         gain.gain.linearRampToValueAtTime(0.0001, now + 0.4);
         osc.connect(gain);
-        gain.connect(masterGain);
+        gain.connect(currentGainNode);
         osc.start(now);
         osc.stop(now + 0.4);
     } 
     else if (soundType === 'alarm') {
+        duration = 0.38;
         [0, 0.15, 0.3].forEach(offset => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -788,11 +897,18 @@ function previewSound(soundType) {
             gain.gain.setValueAtTime(0.3, now + offset);
             gain.gain.setValueAtTime(0.0001, now + offset + 0.08);
             osc.connect(gain);
-            gain.connect(masterGain);
+            gain.connect(currentGainNode);
             osc.start(now + offset);
             osc.stop(now + offset + 0.08);
         });
     }
+
+    const finishTimer = setTimeout(() => {
+        isPlayingPreset = false;
+        playPauseBtn.textContent = "▶ Play";
+    }, duration * 1000);
+
+    presetTimers.push(finishTimer);
 }
 
 function extractPaintId(value) {
@@ -1024,6 +1140,7 @@ function generateTimer() {
     overlay.searchParams.set("size", size);
     overlay.searchParams.set("font", font);
     overlay.searchParams.set("sound", sound);
+    overlay.searchParams.set("volume", volumeControl.value);
 
     if (customSoundSource) {
         overlay.searchParams.set("customSound", customSoundSource);
