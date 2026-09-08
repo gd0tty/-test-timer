@@ -1,297 +1,314 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
 
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<title>GD0TTY'S Timer Overlay</title>
+  <style>
 
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
-<style>
+    html,
+    body {
 
-html,
-body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
 
-    margin: 0;
-    padding: 0;
+      background: transparent;
 
-    width: 100%;
-    height: 100%;
+      overflow: hidden;
 
-    background: transparent !important;
+    }
 
-    overflow: hidden;
-}
+    body {
 
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-body {
+    }
 
-    display: flex;
+    #timer {
 
-    align-items: center;
+      font-family: Inter, Arial, sans-serif;
 
-    justify-content: center;
-}
+      font-weight: 900;
 
+      font-size: 150px;
 
-#timer {
+      line-height: 1;
 
-    display: inline-block;
+      white-space: nowrap;
 
-    font-size: 120px;
+      background: white;
 
-    line-height: 1;
+      color: transparent;
 
-    font-weight: 900;
+      background-clip: text;
+      -webkit-background-clip: text;
 
-    white-space: nowrap;
+      -webkit-text-fill-color: transparent;
 
-    text-align: center;
+      filter:
+        drop-shadow(0 4px 8px rgba(0,0,0,.5));
 
+    }
 
-    
-
-    background-image: var(--paint);
-
-    background-repeat: no-repeat;
-
-    background-position: center;
-
-    background-size: cover;
-
-
-    -webkit-background-clip: text;
-
-    background-clip: text;
-
-
-    color: transparent;
-
-    -webkit-text-fill-color: transparent;
-}
-
-</style>
+  </style>
 
 </head>
 
-
 <body>
 
-
-<div id="timer">
-    10:00
-</div>
+<div id="timer">10:00</div>
 
 
 <script>
 
+const SUPABASE_URL =
+  "https://hkqieahernxlupambubz.supabase.co";
+
+/*
+  PASTE THE SAME SUPABASE PUBLISHABLE KEY HERE.
+*/
+const SUPABASE_KEY =
+  "sb_publishable_Ueiqs7cgDOi13Qj9rVL_9g_AfvCB9ht";
+
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
 const params =
-    new URLSearchParams(
-        window.location.search
-    );
+  new URLSearchParams(
+    window.location.search
+  );
 
 
-const paint =
-    params.get("paint");
-
-
-const start =
-    params.get("start") || "10:00";
-
-
-const size =
-    params.get("size") || "120";
-
+const paintInput =
+  params.get("paint") || "";
 
 const font =
-    params.get("font") || "Roboto";
+  params.get("font") || "Inter";
+
+const size =
+  params.get("size") || "150";
 
 
 const timer =
-    document.getElementById("timer");
-
-
-
-
-const fontEncoded =
-    font
-        .trim()
-        .replace(/\s+/g, "+");
-
-
-const fontLink =
-    document.createElement("link");
-
-
-fontLink.rel =
-    "stylesheet";
-
-
-fontLink.href =
-    "https://fonts.googleapis.com/css2?family=" +
-    fontEncoded +
-    ":wght@100;200;300;400;500;600;700;800;900&display=swap";
-
-
-document.head.appendChild(
-    fontLink
-);
+  document.getElementById("timer");
 
 
 timer.style.fontFamily =
-    `"${font}", sans-serif`;
-
+  `"${font}", Inter, Arial, sans-serif`;
 
 timer.style.fontSize =
-    size + "px";
+  size + "px";
 
 
+let timerState = {
+  remaining_ms: 600000,
+  running: false,
+  updated_at: new Date().toISOString()
+};
 
-if (paint) {
 
-    timer.style.setProperty(
-        "--paint",
-        `url("${paint}")`
-    );
+function getRemaining() {
+
+  if (!timerState.running) {
+    return Number(timerState.remaining_ms);
+  }
+
+  const updated =
+    new Date(timerState.updated_at).getTime();
+
+  const elapsed =
+    Date.now() - updated;
+
+  return Math.max(
+    0,
+    Number(timerState.remaining_ms) - elapsed
+  );
+}
+
+
+function formatTime(ms) {
+
+  const totalSeconds =
+    Math.ceil(ms / 1000);
+
+  const minutes =
+    Math.floor(totalSeconds / 60);
+
+  const seconds =
+    totalSeconds % 60;
+
+  return (
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0")
+  );
+}
+
+
+function applyPaint(url) {
+
+  if (!url) {
+
+    timer.style.background =
+      "white";
+
+    return;
+  }
+
+  /*
+    A direct 7TV Paint image URL.
+  */
+
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://")
+  ) {
+
+    timer.style.backgroundImage =
+      `url("${url}")`;
+
+    timer.style.backgroundSize =
+      "cover";
+
+    timer.style.backgroundPosition =
+      "center";
+
+    timer.style.backgroundRepeat =
+      "no-repeat";
+
+    return;
+  }
+
+  /*
+    Try to resolve a 7TV Paint ID.
+  */
+
+  fetch(
+    "https://7tv.io/v3/cosmetics"
+  )
+    .then(r => r.json())
+    .then(data => {
+
+      let paint = null;
+
+      if (Array.isArray(data)) {
+
+        paint =
+          data.find(
+            x => x.id === url
+          );
+
+      }
+
+      if (!paint) return;
+
+      if (
+        paint.function === "URL" &&
+        paint.image_url
+      ) {
+
+        timer.style.backgroundImage =
+          `url("${paint.image_url}")`;
+
+        timer.style.backgroundSize =
+          "cover";
+
+        timer.style.backgroundPosition =
+          "center";
+
+      }
+
+    })
+    .catch(err => {
+
+      console.error(
+        "7TV Paint error:",
+        err
+      );
+
+    });
 
 }
 
 
+async function loadTimer() {
 
+  const { data, error } =
+    await supabaseClient
+      .from("timers")
+      .select("*")
+      .eq("id", "main")
+      .single();
 
-function parseTime(value) {
+  if (data) {
 
-    const parts =
-        value.split(":").map(Number);
+    timerState = data;
 
+  }
 
-    if (parts.length === 2) {
-
-        return (
-            (parts[0] * 60) +
-            parts[1]
-        );
-
-    }
-
-
-    if (parts.length === 3) {
-
-        return (
-            (parts[0] * 3600) +
-            (parts[1] * 60) +
-            parts[2]
-        );
-
-    }
-
-
-    return 0;
 }
 
 
-function formatTime(seconds) {
+supabaseClient
+  .channel("timer-sync")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "timers",
+      filter: "id=eq.main"
+    },
+    payload => {
 
-    seconds =
-        Math.max(
-            0,
-            Math.floor(seconds)
-        );
+      if (payload.new) {
 
+        timerState =
+          payload.new;
 
-    const hours =
-        Math.floor(seconds / 3600);
-
-
-    const minutes =
-        Math.floor(
-            (seconds % 3600) / 60
-        );
-
-
-    const secs =
-        seconds % 60;
-
-
-    if (hours > 0) {
-
-        return (
-            String(hours).padStart(2, "0") +
-            ":" +
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(secs).padStart(2, "0")
-        );
+      }
 
     }
+  )
+  .subscribe();
 
 
-    return (
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(secs).padStart(2, "0")
-    );
+applyPaint(paintInput);
+
+loadTimer();
+
+
+function updateDisplay() {
+
+  const remaining =
+    getRemaining();
+
+  timer.textContent =
+    formatTime(remaining);
+
 }
 
 
+setInterval(
+  updateDisplay,
+  100
+);
 
-
-let remaining =
-    parseTime(start);
-
-
-let last =
-    performance.now();
-
-
-function update() {
-
-    const now =
-        performance.now();
-
-
-    const delta =
-        (now - last) / 1000;
-
-
-    last =
-        now;
-
-
-    if (remaining > 0) {
-
-        remaining -= delta;
-
-
-        if (remaining < 0) {
-
-            remaining = 0;
-
-        }
-
-    }
-
-
-    timer.textContent =
-        formatTime(remaining);
-
-
-    requestAnimationFrame(update);
-}
-
-
-update();
+updateDisplay();
 
 </script>
 
 </body>
-
 </html>
