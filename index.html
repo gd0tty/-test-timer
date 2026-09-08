@@ -175,23 +175,59 @@ input::placeholder {
     font-size: 12px;
 }
 
-/* 7Database link */
+/* 7Database preview */
 
-.database-link {
+.database-preview {
+    margin-top: 32px;
+    padding: 28px;
+    border-radius: 22px;
+    background: rgba(15, 21, 35, .9);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 20px 70px rgba(0,0,0,.3);
     text-align: center;
-    margin-top: 28px;
-    font-size: 13px;
-    color: #7f8aa0;
 }
 
-.database-link a {
-    color: #00c8ff;
+.database-preview h2 {
+    margin: 0 0 10px;
+    font-size: 26px;
+    color: white;
+}
+
+.database-preview p {
+    margin: 0 0 22px;
+    color: #9aa5b8;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.database-preview a {
+    display: block;
     text-decoration: none;
-    font-weight: 700;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,200,255,.25);
+    background: #080d18;
+    transition: .2s;
 }
 
-.database-link a:hover {
-    text-decoration: underline;
+.database-preview a:hover {
+    transform: translateY(-3px);
+    border-color: #00c8ff;
+    box-shadow: 0 10px 35px rgba(0,200,255,.15);
+}
+
+.database-preview img {
+    display: block;
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+}
+
+.database-preview .website-name {
+    padding: 16px;
+    color: #00c8ff;
+    font-size: 22px;
+    font-weight: 800;
 }
 
 @media (max-width: 800px) {
@@ -207,6 +243,14 @@ input::placeholder {
 
     .timer {
         font-size: 60px;
+    }
+
+    .database-preview h2 {
+        font-size: 21px;
+    }
+
+    .database-preview img {
+        height: 200px;
     }
 
 }
@@ -347,17 +391,35 @@ input::placeholder {
 
     </div>
 
-    <!-- 7Database -->
+ 
 
-    <div class="database-link">
-        Check out this website to get your Paint IDs to customize your timer:
+    <div class="database-preview">
+
+        <h2>
+            Get all your Paint IDs from this website
+        </h2>
+
+        <p>
+            Use Paint IDs from 7Database to customize your timer.
+        </p>
+
         <a
             href="https://7database.com/"
             target="_blank"
             rel="noopener noreferrer"
         >
-            7Database
+
+            <img
+                src="https://kappa.lol/YoJLTG"
+                alt="7Database website preview"
+            >
+
+            <div class="website-name">
+                7Database →
+            </div>
+
         </a>
+
     </div>
 
 </div>
