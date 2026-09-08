@@ -1,300 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>GD0TTY'S TIMER</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timer Overlay</title>
 <style>
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-
-    width: 100%;
-    height: 100%;
-
-    background: transparent !important;
-
-    overflow: hidden;
-    font-family: sans-serif;
+* {
+    box-sizing: border-box;
 }
 
-body {
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#timer {
-    display: inline-block;
-
+.timer {
     font-size: 120px;
-    line-height: 1;
-
     font-weight: 900;
-
+    line-height: 1;
     white-space: nowrap;
     text-align: center;
-
-    color: white;
-
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
-
     -webkit-background-clip: text;
     background-clip: text;
+    color: white;
 }
 
-/* CONFIGURATION CONTROL PANEL */
-#config-panel {
+#ytHiddenContainer {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(15, 15, 20, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 9999;
-    backdrop-filter: blur(8px);
-    color: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    transition: opacity 0.3s ease;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    left: -9999px;
+    top: -9999px;
 }
-
-#config-panel.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-#config-panel:hover {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-#config-panel label {
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #ccc;
-}
-
-#config-panel select, 
-#config-panel input {
-    background: #222;
-    color: white;
-    border: 1px solid #444;
-    padding: 6px 10px;
-    border-radius: 4px;
-    outline: none;
-    font-size: 13px;
-}
-
-#config-panel input {
-    display: none;
-}
-
-#hide-btn {
-    margin-top: 4px;
-    background: #ff4757;
-    color: white;
-    border: none;
-    padding: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 12px;
-}
-
-#hide-btn:hover {
-    background: #ff6b81;
-}
-
 </style>
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
-
 <body>
 
-<!-- UI Controls for selecting end timer sound -->
-<div id="config-panel">
-    <label for="sound-select">End Timer Sound:</label>
-    <select id="sound-select" onchange="handleSoundChange()">
-        <option value="scifi">Sci-Fi Synth Chime</option>
-        <option value="arcade">Retro Arcade Beep</option>
-        <option value="alarm">Digital Alarm</option>
-        <option value="custom">Custom URL (.mp3 / .wav)</option>
-    </select>
+<div class="timer" id="timer">00:00</div>
 
-    <input type="text" id="custom-url-input" placeholder="Paste Audio URL here..." onchange="handleCustomUrlChange()">
-    <button id="hide-btn" onclick="toggleConfig()">Hide Menu (For OBS)</button>
+<div id="ytHiddenContainer">
+    <div id="ytPlayer"></div>
 </div>
 
-<div id="timer">10:00</div>
-
 <script>
-
-const params = new URLSearchParams(
-    window.location.search
-);
-
-const paintId =
-    params.get("paint");
-
-const start =
-    params.get("start") || "10:00";
-
-const size =
-    params.get("size") || "120";
-
-const font =
-    params.get("font") || "Roboto";
-
-const paramSound =
-    params.get("sound");
-
-const timer =
-    document.getElementById("timer");
-
-// --- AUDIO CONFIGURATION & LOGIC ---
-let audioCtx = null;
-let customAudio = null;
-let currentSoundMode = "scifi"; // default sound
-
-const soundSelect = document.getElementById("sound-select");
-const customUrlInput = document.getElementById("custom-url-input");
-
-if (paramSound) {
-    if (["scifi", "arcade", "alarm"].includes(paramSound)) {
-        currentSoundMode = paramSound;
-        soundSelect.value = paramSound;
-    } else {
-        currentSoundMode = "custom";
-        soundSelect.value = "custom";
-        customUrlInput.style.display = "block";
-        customUrlInput.value = paramSound;
-        customAudio = new Audio(paramSound);
-    }
-}
-
-function handleSoundChange() {
-    currentSoundMode = soundSelect.value;
-    if (currentSoundMode === "custom") {
-        customUrlInput.style.display = "block";
-    } else {
-        customUrlInput.style.display = "none";
-        customAudio = null;
-    }
-}
-
-function handleCustomUrlChange() {
-    const url = customUrlInput.value.trim();
-    if (url) {
-        customAudio = new Audio(url);
-    }
-}
-
-function toggleConfig() {
-    document.getElementById("config-panel").classList.add("hidden");
-}
-
-function initAudio() {
-    if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-            audioCtx = new AudioContext();
-        }
-    }
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-}
-
-window.addEventListener('click', initAudio, { once: true });
-
-function playEndSound() {
-    // 1. Play Custom audio file if selected
-    if (currentSoundMode === "custom" && customAudio) {
-        customAudio.play().catch(err => console.log("Audio play failed:", err));
-        return;
-    }
-
-    initAudio();
-    if (!audioCtx) return;
-
-    // 2. Play preset synthesized Web Audio sound based on selection
-    let notes = [];
-    let oscType = "sine";
-
-    if (currentSoundMode === "scifi") {
-        notes = [523.25, 783.99, 1046.50]; // C5 -> G5 -> C6
-        oscType = "sine";
-    } else if (currentSoundMode === "arcade") {
-        notes = [440, 554.37, 659.25, 880]; // Classic power-up sweep
-        oscType = "square";
-    } else if (currentSoundMode === "alarm") {
-        notes = [880, 880, 880]; // Triple high beep
-        oscType = "triangle";
-    }
-
-    notes.forEach((freq, index) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = oscType;
-        osc.frequency.value = freq;
-
-        const startTime = audioCtx.currentTime + (index * 0.1);
-        const duration = 0.3;
-
-        gain.gain.setValueAtTime(0.2, startTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start(startTime);
-        osc.stop(startTime + duration);
-    });
-}
-// --- END AUDIO SYSTEM ---
-
-const fontEncoded =
-    font
-        .trim()
-        .replace(/\s+/g, "+");
-
-const fontLink =
-    document.createElement("link");
-
-fontLink.rel = "stylesheet";
-
-fontLink.href =
-    "https://fonts.googleapis.com/css2?family=" +
-    fontEncoded +
-    ":wght@100;200;300;400;500;600;700;800;900&display=swap";
-
-document.head.appendChild(fontLink);
-
-timer.style.fontFamily =
-    `"${font}", sans-serif`;
-
-timer.style.fontSize =
-    size + "px";
-
-const SEVENTV_API =
-    "https://7tv.io/v4/gql";
+const SEVENTV_API = "https://7tv.io/v4/gql";
 
 const PAINT_QUERY = `
 query {
@@ -302,95 +64,28 @@ query {
         paints {
             id
             name
-
             data {
                 layers {
                     id
                     opacity
-
                     ty {
-
                         __typename
-
                         ... on PaintLayerTypeSingleColor {
-
-                            color {
-                                r
-                                g
-                                b
-                                a
-                                hex
-                            }
-
+                            color { r g b a hex }
                         }
-
                         ... on PaintLayerTypeLinearGradient {
-
-                            angle
-                            repeating
-
-                            stops {
-                                at
-
-                                color {
-                                    r
-                                    g
-                                    b
-                                    a
-                                    hex
-                                }
-                            }
-
+                            angle repeating stops { at color { r g b a hex } }
                         }
-
                         ... on PaintLayerTypeRadialGradient {
-
-                            repeating
-                            shape
-
-                            stops {
-                                at
-
-                                color {
-                                    r
-                                    g
-                                    b
-                                    a
-                                    hex
-                                }
-                            }
-
+                            repeating shape stops { at color { r g b a hex } }
                         }
-
                         ... on PaintLayerTypeImage {
-
-                            images {
-                                url
-                                width
-                                height
-                                mime
-                                frameCount
-                            }
-
+                            images { url width height mime frameCount }
                         }
-
                     }
                 }
-
                 shadows {
-
-                    blur
-                    offsetX
-                    offsetY
-
-                    color {
-                        r
-                        g
-                        b
-                        a
-                        hex
-                    }
-
+                    blur offsetX offsetY color { r g b a hex }
                 }
             }
         }
@@ -398,409 +93,286 @@ query {
 }
 `;
 
-function colorToCss(color) {
+const timerEl = document.getElementById("timer");
 
-    if (!color) {
-        return "rgba(255,255,255,1)";
+
+const params = new URLSearchParams(window.location.search);
+const paintParam = params.get("paint") || "";
+const fontParam = params.get("font") || "Roboto";
+const startParam = params.get("start") || "10:00";
+const sizeParam = params.get("size") || "120";
+const soundParam = params.get("sound") || "none";
+const customSoundParam = params.get("customSound") || "";
+const volumeParam = parseFloat(params.get("volume") || "1");
+
+let audioCtx = null;
+let ytPlayer = null;
+let isYtReady = false;
+let soundPlayed = false;
+
+
+function setupStyles() {
+    if (fontParam) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "https://fonts.googleapis.com/css2?family=" + fontParam.replace(/\s+/g, "+") + ":wght@100;200;300;400;500;600;700;800;900&display=swap";
+        document.head.appendChild(link);
+        timerEl.style.fontFamily = `"${fontParam}", sans-serif`;
     }
+    if (sizeParam) {
+        timerEl.style.fontSize = sizeParam + "px";
+    }
+}
 
-    const r =
-        color.r ?? 255;
 
-    const g =
-        color.g ?? 255;
+function extractPaintId(value) {
+    value = String(value || "").trim();
+    if (!value) return "";
+    if (/^[A-Za-z0-9]+$/.test(value)) return value;
+    try {
+        const url = new URL(value);
+        const parts = url.pathname.split("/").filter(Boolean);
+        if (parts.length) {
+            const last = parts[parts.length - 1];
+            if (/^[A-Za-z0-9]+$/.test(last)) return last;
+        }
+    } catch (e) {}
+    return value;
+}
 
-    const b =
-        color.b ?? 255;
-
-    const a =
-        color.a ?? 1;
-
-    return `rgba(${r},${g},${b},${a})`;
+function colorToRGBA(color, opacity = 1) {
+    if (!color) return "rgba(255,255,255,1)";
+    const alpha = typeof color.a === "number" ? color.a / 255 : 1;
+    const finalAlpha = Math.max(0, Math.min(1, alpha * opacity));
+    return `rgba(${color.r || 0},${color.g || 0},${color.b || 0},${finalAlpha})`;
 }
 
 function convertPaintLayer(layer) {
+    if (!layer || !layer.ty) return null;
+    const type = layer.ty;
+    const opacity = typeof layer.opacity === "number" ? layer.opacity : 1;
 
-    if (!layer || !layer.ty) {
-        return null;
+    if (type.__typename === "PaintLayerTypeSingleColor") {
+        const color = colorToRGBA(type.color, opacity);
+        return { image: `linear-gradient(${color},${color})`, size: "100% 100%", repeat: "no-repeat" };
     }
-
-    const type =
-        layer.ty.__typename;
-
-    const opacity =
-        layer.opacity ?? 1;
-
-    if (
-        type ===
-        "PaintLayerTypeSingleColor"
-    ) {
-
-        const color =
-            colorToCss(
-                layer.ty.color
-            );
-
-        return {
-            image: `linear-gradient(${color},${color})`,
-            size: "100% 100%",
-            repeat: "no-repeat",
-            opacity
-        };
+    if (type.__typename === "PaintLayerTypeLinearGradient") {
+        const stops = (type.stops || []).map(stop => `${colorToRGBA(stop.color, opacity)} ${stop.at * 100}%`).join(",");
+        const fn = type.repeating ? "repeating-linear-gradient" : "linear-gradient";
+        return { image: `${fn}(${type.angle || 0}deg,${stops})`, size: "100% 100%", repeat: "no-repeat" };
     }
-
-    if (
-        type ===
-        "PaintLayerTypeLinearGradient"
-    ) {
-
-        const stops =
-            (layer.ty.stops || [])
-                .map(stop => {
-
-                    return (
-                        colorToCss(stop.color) +
-                        " " +
-                        (stop.at * 100) +
-                        "%"
-                    );
-
-                })
-                .join(",");
-
-        const angle =
-            layer.ty.angle ?? 0;
-
-        return {
-            image:
-                `linear-gradient(${angle}deg,${stops})`,
-            size: "100% 100%",
-            repeat:
-                layer.ty.repeating
-                    ? "repeat"
-                    : "no-repeat",
-            opacity
-        };
+    if (type.__typename === "PaintLayerTypeRadialGradient") {
+        const stops = (type.stops || []).map(stop => `${colorToRGBA(stop.color, opacity)} ${stop.at * 100}%`).join(",");
+        const fn = type.repeating ? "repeating-radial-gradient" : "radial-gradient";
+        const shape = type.shape === "ELLIPSE" ? "ellipse" : "circle";
+        return { image: `${fn}(${shape},${stops})`, size: "100% 100%", repeat: "no-repeat" };
     }
-
-    if (
-        type ===
-        "PaintLayerTypeRadialGradient"
-    ) {
-
-        const stops =
-            (layer.ty.stops || [])
-                .map(stop => {
-
-                    return (
-                        colorToCss(stop.color) +
-                        " " +
-                        (stop.at * 100) +
-                        "%"
-                    );
-
-                })
-                .join(",");
-
-        return {
-            image:
-                `radial-gradient(circle,${stops})`,
-            size: "100% 100%",
-            repeat:
-                layer.ty.repeating
-                    ? "repeat"
-                    : "no-repeat",
-            opacity
-        };
+    if (type.__typename === "PaintLayerTypeImage") {
+        const images = type.images || [];
+        const image = images.slice().sort((a, b) => (b.frameCount || 1) - (a.frameCount || 1))[0] || null;
+        if (!image) return null;
+        return { image: `url("${image.url}")`, size: "cover", repeat: "no-repeat" };
     }
-
-    if (
-        type ===
-        "PaintLayerTypeImage"
-    ) {
-
-        const images =
-            layer.ty.images || [];
-
-        if (!images.length) {
-            return null;
-        }
-
-        const image =
-            images.reduce(
-                (best, current) => {
-
-                    return (
-                        (current.frameCount || 1) >
-                        (best.frameCount || 1)
-                    )
-                        ? current
-                        : best;
-
-                },
-                images[0]
-            );
-
-        if (!image.url) {
-            return null;
-        }
-
-        return {
-            image:
-                `url("${image.url}")`,
-            size: "cover",
-            repeat: "no-repeat",
-            opacity
-        };
-    }
-
     return null;
 }
 
 async function loadPaint() {
-
-    if (!paintId) {
-        return;
-    }
+    const paintId = extractPaintId(paintParam);
+    if (!paintId) return;
 
     try {
+        const response = await fetch(SEVENTV_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({ query: PAINT_QUERY })
+        });
+        const result = await response.json();
+        const paints = result?.data?.paints?.paints || [];
+        const wanted = String(paintId).toLowerCase();
+        const paint = paints.find(item => String(item.id).toLowerCase() === wanted);
 
-        const response =
-            await fetch(
-                SEVENTV_API,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        query:
-                            PAINT_QUERY
-                    })
-                }
-            );
-
-        if (!response.ok) {
-            throw new Error(
-                "7TV API request failed"
-            );
-        }
-
-        const result =
-            await response.json();
-
-        const paints =
-            result
-                ?.data
-                ?.paints
-                ?.paints || [];
-
-        const paint =
-            paints.find(
-                p =>
-                    p.id === paintId
-            );
-
-        if (!paint) {
-
-            console.error(
-                "Paint not found:",
-                paintId
-            );
-
-            return;
-        }
-
-        const layers =
-            paint
-                ?.data
-                ?.layers || [];
-
-        const backgrounds = [];
-
-        const sizes = [];
-        const repeats = [];
-
-        for (
-            const layer of layers
-        ) {
-
-            const converted =
-                convertPaintLayer(
-                    layer
-                );
-
-            if (!converted) {
-                continue;
+        if (paint && paint.data) {
+            const layers = paint.data.layers || [];
+            const rendered = layers.map(convertPaintLayer).filter(Boolean);
+            if (rendered.length) {
+                timerEl.style.backgroundImage = rendered.map(l => l.image).join(",");
+                timerEl.style.backgroundSize = rendered.map(l => l.size).join(",");
+                timerEl.style.backgroundRepeat = rendered.map(l => l.repeat).join(",");
+                timerEl.style.backgroundPosition = rendered.map(() => "center").join(",");
+                timerEl.style.color = "transparent";
+                timerEl.style.webkitTextFillColor = "transparent";
             }
-
-            backgrounds.push(
-                converted.image
-            );
-
-            sizes.push(
-                converted.size
-            );
-
-            repeats.push(
-                converted.repeat
-            );
+            const shadows = paint.data.shadows || [];
+            if (shadows.length) {
+                timerEl.style.filter = shadows.map(s => `drop-shadow(${s.offsetX || 0}px ${s.offsetY || 0}px ${s.blur || 0}px ${colorToRGBA(s.color)})`).join(" ");
+            }
         }
+    } catch(e) {}
+}
 
-        if (backgrounds.length) {
 
-            timer.style.backgroundImage =
-                backgrounds.join(",");
-
-            timer.style.backgroundSize =
-                sizes.join(",");
-
-            timer.style.backgroundRepeat =
-                repeats.join(",");
-
-            timer.style.color =
-                "transparent";
-
-            timer.style.webkitTextFillColor =
-                "transparent";
-
-        }
-
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
 
-    catch (error) {
-
-        console.error(
-            "Could not load 7TV Paint:",
-            error
-        );
-
-        timer.style.color =
-            "white";
-
-        timer.style.webkitTextFillColor =
-            "white";
+function unlockAudio() {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+        ctx.resume();
     }
 }
 
+window.addEventListener('click', unlockAudio, { once: true });
+window.addEventListener('keydown', unlockAudio, { once: true });
+
+function extractYouTubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('ytPlayer', {
+        height: '1',
+        width: '1',
+        playerVars: { 'autoplay': 0, 'controls': 0 },
+        events: {
+            'onReady': () => { isYtReady = true; }
+        }
+    });
+}
+
+function triggerFinishSound() {
+    if (soundPlayed) return;
+    soundPlayed = true;
+
+    if (soundParam === 'none') return;
+
+    if (soundParam === 'custom' && customSoundParam) {
+        const ytId = extractYouTubeId(customSoundParam);
+        if (ytId) {
+            if (isYtReady && ytPlayer) {
+                ytPlayer.loadVideoById(ytId);
+                ytPlayer.setVolume(volumeParam * 100);
+                ytPlayer.playVideo();
+            }
+        } else {
+            const audio = new Audio(customSoundParam);
+            audio.crossOrigin = "anonymous";
+            audio.volume = volumeParam;
+            audio.play().catch(e => console.log("Audio autoplay restricted:", e));
+        }
+        return;
+    }
+
+  
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(volumeParam, now);
+    gainNode.connect(ctx.destination);
+
+    if (soundParam === 'chime') {
+        [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            g.gain.setValueAtTime(0.3, now + i * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.6);
+            osc.connect(g);
+            g.connect(gainNode);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.6);
+        });
+    } else if (soundParam === 'bell') {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        g.gain.setValueAtTime(0.5, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+        osc.connect(g);
+        g.connect(gainNode);
+        osc.start(now);
+        osc.stop(now + 1.2);
+    } else if (soundParam === 'buzzer') {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        g.gain.setValueAtTime(0.4, now);
+        g.gain.linearRampToValueAtTime(0.0001, now + 0.4);
+        osc.connect(g);
+        g.connect(gainNode);
+        osc.start(now);
+        osc.stop(now + 0.4);
+    } else if (soundParam === 'alarm') {
+        [0, 0.15, 0.3].forEach(offset => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(950, now + offset);
+            g.gain.setValueAtTime(0.3, now + offset);
+            g.gain.setValueAtTime(0.0001, now + offset + 0.08);
+            osc.connect(g);
+            g.connect(gainNode);
+            osc.start(now + offset);
+            osc.stop(now + offset + 0.08);
+        });
+    }
+}
+
+
 function parseTime(value) {
-
-    const parts =
-        value
-            .split(":")
-            .map(Number);
-
-    if (parts.length === 2) {
-
-        return (
-            (parts[0] * 60) +
-            parts[1]
-        );
-    }
-
-    if (parts.length === 3) {
-
-        return (
-            (parts[0] * 3600) +
-            (parts[1] * 60) +
-            parts[2]
-        );
-    }
-
+    const parts = value.split(":").map(Number);
+    if (parts.length === 2) return (parts[0] * 60) + parts[1];
+    if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
     return 0;
 }
 
 function formatTime(seconds) {
-
-    seconds =
-        Math.max(
-            0,
-            Math.floor(seconds)
-        );
-
-    const hours =
-        Math.floor(
-            seconds / 3600
-        );
-
-    const minutes =
-        Math.floor(
-            (seconds % 3600) / 60
-        );
-
-    const secs =
-        seconds % 60;
+    seconds = Math.max(0, Math.floor(seconds));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
 
     if (hours > 0) {
-
-        return (
-            String(hours)
-                .padStart(2, "0") +
-            ":" +
-            String(minutes)
-                .padStart(2, "0") +
-            ":" +
-            String(secs)
-                .padStart(2, "0")
-        );
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     }
-
-    return (
-        String(minutes)
-            .padStart(2, "0") +
-        ":" +
-        String(secs)
-            .padStart(2, "0")
-    );
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
-let remaining =
-    parseTime(start);
+let remaining = parseTime(startParam);
+let lastTime = performance.now();
 
-let last =
-    performance.now();
-
-let hasPlayedSound = false;
-
-function update() {
-
-    const now =
-        performance.now();
-
-    const delta =
-        (now - last) / 1000;
-
-    last =
-        now;
+function runTimer() {
+    const now = performance.now();
+    const delta = (now - lastTime) / 1000;
+    lastTime = now;
 
     if (remaining > 0) {
-
         remaining -= delta;
-
         if (remaining <= 0) {
             remaining = 0;
-            if (!hasPlayedSound) {
-                playEndSound();
-                hasPlayedSound = true;
-            }
+            triggerFinishSound();
         }
     }
 
-    timer.textContent =
-        formatTime(remaining);
-
-    requestAnimationFrame(
-        update
-    );
+    timerEl.textContent = formatTime(remaining);
+    requestAnimationFrame(runTimer);
 }
 
+
+setupStyles();
 loadPaint();
-
-update();
-
+runTimer();
 </script>
 
 </body>
