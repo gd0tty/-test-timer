@@ -24,6 +24,7 @@ body {
     background: transparent !important;
 
     overflow: hidden;
+    font-family: sans-serif;
 }
 
 body {
@@ -53,10 +54,92 @@ body {
     background-clip: text;
 }
 
+/* CONFIGURATION CONTROL PANEL */
+#config-panel {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(15, 15, 20, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+    backdrop-filter: blur(8px);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: opacity 0.3s ease;
+}
+
+#config-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#config-panel:hover {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+#config-panel label {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ccc;
+}
+
+#config-panel select, 
+#config-panel input {
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    padding: 6px 10px;
+    border-radius: 4px;
+    outline: none;
+    font-size: 13px;
+}
+
+#config-panel input {
+    display: none;
+}
+
+#hide-btn {
+    margin-top: 4px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#hide-btn:hover {
+    background: #ff6b81;
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- UI Controls for selecting end timer sound -->
+<div id="config-panel">
+    <label for="sound-select">End Timer Sound:</label>
+    <select id="sound-select" onchange="handleSoundChange()">
+        <option value="scifi">Sci-Fi Synth Chime</option>
+        <option value="arcade">Retro Arcade Beep</option>
+        <option value="alarm">Digital Alarm</option>
+        <option value="custom">Custom URL (.mp3 / .wav)</option>
+    </select>
+
+    <input type="text" id="custom-url-input" placeholder="Paste Audio URL here..." onchange="handleCustomUrlChange()">
+    <button id="hide-btn" onclick="toggleConfig()">Hide Menu (For OBS)</button>
+</div>
 
 <div id="timer">10:00</div>
 
@@ -78,11 +161,53 @@ const size =
 const font =
     params.get("font") || "Roboto";
 
+const paramSound =
+    params.get("sound");
+
 const timer =
     document.getElementById("timer");
 
-// --- AUDIO SYSTEM SETUP ---
+// --- AUDIO CONFIGURATION & LOGIC ---
 let audioCtx = null;
+let customAudio = null;
+let currentSoundMode = "scifi"; // default sound
+
+const soundSelect = document.getElementById("sound-select");
+const customUrlInput = document.getElementById("custom-url-input");
+
+if (paramSound) {
+    if (["scifi", "arcade", "alarm"].includes(paramSound)) {
+        currentSoundMode = paramSound;
+        soundSelect.value = paramSound;
+    } else {
+        currentSoundMode = "custom";
+        soundSelect.value = "custom";
+        customUrlInput.style.display = "block";
+        customUrlInput.value = paramSound;
+        customAudio = new Audio(paramSound);
+    }
+}
+
+function handleSoundChange() {
+    currentSoundMode = soundSelect.value;
+    if (currentSoundMode === "custom") {
+        customUrlInput.style.display = "block";
+    } else {
+        customUrlInput.style.display = "none";
+        customAudio = null;
+    }
+}
+
+function handleCustomUrlChange() {
+    const url = customUrlInput.value.trim();
+    if (url) {
+        customAudio = new Audio(url);
+    }
+}
+
+function toggleConfig() {
+    document.getElementById("config-panel").classList.add("hidden");
+}
 
 function initAudio() {
     if (!audioCtx) {
@@ -96,27 +221,44 @@ function initAudio() {
     }
 }
 
-// User interaction listener to satisfy browser autoplay policies
 window.addEventListener('click', initAudio, { once: true });
 
 function playEndSound() {
+    // 1. Play Custom audio file if selected
+    if (currentSoundMode === "custom" && customAudio) {
+        customAudio.play().catch(err => console.log("Audio play failed:", err));
+        return;
+    }
+
     initAudio();
     if (!audioCtx) return;
 
-    // Futuristic synth finish chime: C5 -> G5 -> C6
-    const notes = [523.25, 783.99, 1046.50];
+    // 2. Play preset synthesized Web Audio sound based on selection
+    let notes = [];
+    let oscType = "sine";
+
+    if (currentSoundMode === "scifi") {
+        notes = [523.25, 783.99, 1046.50]; // C5 -> G5 -> C6
+        oscType = "sine";
+    } else if (currentSoundMode === "arcade") {
+        notes = [440, 554.37, 659.25, 880]; // Classic power-up sweep
+        oscType = "square";
+    } else if (currentSoundMode === "alarm") {
+        notes = [880, 880, 880]; // Triple high beep
+        oscType = "triangle";
+    }
 
     notes.forEach((freq, index) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
-        osc.type = "sine";
+        osc.type = oscType;
         osc.frequency.value = freq;
 
-        const startTime = audioCtx.currentTime + (index * 0.12);
-        const duration = 0.5;
+        const startTime = audioCtx.currentTime + (index * 0.1);
+        const duration = 0.3;
 
-        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.setValueAtTime(0.2, startTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
         osc.connect(gain);
