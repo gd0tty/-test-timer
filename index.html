@@ -184,6 +184,8 @@ input::placeholder {
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 18px;
     overflow: hidden;
+    display: inline-block;
+    max-width: fit-content;
 }
 
 .paint-help summary {
@@ -193,6 +195,10 @@ input::placeholder {
     font-weight: 800;
     color: white;
     list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
 }
 
 .paint-help summary::-webkit-details-marker {
@@ -201,7 +207,6 @@ input::placeholder {
 
 .paint-help summary::after {
     content: "▼";
-    float: right;
     color: #00c8ff;
     font-size: 13px;
     transition: .2s;
@@ -217,10 +222,14 @@ input::placeholder {
 
 .paint-help-content {
     padding: 0 20px 20px;
+}
+
+.paint-help-body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    max-width: 250px;
 }
 
 .paint-help-content p {
@@ -233,7 +242,6 @@ input::placeholder {
 .paint-help-gif {
     display: block;
     width: 100%;
-    max-width: 250px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.08);
 }
@@ -316,6 +324,15 @@ input::placeholder {
 
     .database-preview img {
         height: 200px;
+    }
+
+    .paint-help {
+        display: block;
+        max-width: 100%;
+    }
+
+    .paint-help-body {
+        max-width: 100%;
     }
 
 }
@@ -458,6 +475,8 @@ input::placeholder {
     </div>
 
 
+    <!-- 7TV PAINT ID HELP -->
+
     <details class="paint-help">
 
         <summary>
@@ -466,15 +485,19 @@ input::placeholder {
 
         <div class="paint-help-content">
 
-            <p>
-                Follow the steps shown in the GIF below to copy your 7TV Paint ID.
-            </p>
+            <div class="paint-help-body">
 
-            <img
-                class="paint-help-gif"
-                src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
-                alt="How to copy a 7TV Paint ID"
-            >
+                <p>
+                    Follow the steps shown in the GIF below to copy your 7TV Paint ID.
+                </p>
+
+                <img
+                    class="paint-help-gif"
+                    src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
+                    alt="How to copy a 7TV Paint ID"
+                >
+
+            </div>
 
         </div>
 
