@@ -409,6 +409,15 @@ input::placeholder {
     font-weight: 800;
 }
 
+#ytHiddenContainer {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    left: -9999px;
+    top: -9999px;
+}
+
 @media (max-width: 800px) {
     .container {
         width: calc(100% - 25px);
@@ -450,6 +459,7 @@ input::placeholder {
 }
 
 </style>
+<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 
 <body>
@@ -597,7 +607,7 @@ input::placeholder {
                     <option value="bell">Bell</option>
                     <option value="buzzer">Buzzer</option>
                     <option value="alarm">Alarm</option>
-                    <option value="custom">Custom MP3 / WAV</option>
+                    <option value="custom">Custom MP3 / WAV / YouTube</option>
                 </select>
             </div>
 
@@ -610,7 +620,7 @@ input::placeholder {
             </div>
 
             <div class="custom-sound-inputs" id="customSoundContainer">
-                <input type="text" id="customAudioUrl" placeholder="Paste direct audio URL..." oninput="playCustomAudioUrl(this.value)">
+                <input type="text" id="customAudioUrl" placeholder="Paste direct audio or YouTube URL..." oninput="playCustomAudioUrl(this.value)">
                 
                 <label class="file-upload-btn" id="uploadLabel">
                     📁 Choose Audio File (.mp3 / .wav / .ogg)
@@ -650,6 +660,9 @@ input::placeholder {
 
 </div>
 
+<div id="ytHiddenContainer">
+    <div id="ytPlayer"></div>
+</div>
 
 <script>
 
@@ -701,13 +714,45 @@ const customAudioUrlInput = document.getElementById("customAudioUrl");
 const fileDisplay = document.getElementById("fileDisplay");
 const playPauseBtn = document.getElementById("playPauseBtn");
 const volumeControl = document.getElementById("volumeControl");
-const uploadLabel = document.getElementById("uploadLabel");
 
 let currentAudioElement = null;
+let ytPlayer = null;
+let isYtReady = false;
+let currentYtVideoId = null;
+
 let audioCtx = null;
 let currentGainNode = null;
 let isPlayingPreset = false;
 let presetTimers = [];
+
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('ytPlayer', {
+        height: '1',
+        width: '1',
+        playerVars: {
+            'autoplay': 0,
+            'controls': 0
+        },
+        events: {
+            'onReady': () => { isYtReady = true; },
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        playPauseBtn.textContent = "⏸ Pause";
+    } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+        playPauseBtn.textContent = "▶ Play";
+    }
+}
+
+function extractYouTubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
 
 function getAudioContext() {
     if (!audioCtx) {
@@ -729,6 +774,13 @@ function stopCurrentAudio() {
         currentAudioElement.currentTime = 0;
         currentAudioElement = null;
     }
+
+    if (ytPlayer && isYtReady) {
+        try {
+            ytPlayer.stopVideo();
+        } catch(e) {}
+    }
+
     playPauseBtn.textContent = "▶ Play";
 }
 
@@ -740,6 +792,9 @@ function updateVolume(val) {
     if (currentAudioElement) {
         currentAudioElement.volume = volume;
     }
+    if (ytPlayer && isYtReady && typeof ytPlayer.setVolume === 'function') {
+        ytPlayer.setVolume(volume * 100);
+    }
 }
 
 function togglePlayPause() {
@@ -750,16 +805,28 @@ function togglePlayPause() {
         const audioUrl = customAudioUrlInput.value.trim();
         if (!audioUrl) return;
 
-        if (currentAudioElement) {
-            if (currentAudioElement.paused) {
-                currentAudioElement.play();
-                playPauseBtn.textContent = "⏸ Pause";
+        const ytId = extractYouTubeId(audioUrl);
+
+        if (ytId) {
+            if (!isYtReady || !ytPlayer) return;
+            const state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                ytPlayer.pauseVideo();
             } else {
-                currentAudioElement.pause();
-                playPauseBtn.textContent = "▶ Play";
+                ytPlayer.playVideo();
             }
         } else {
-            playAudioWithBoost(audioUrl);
+            if (currentAudioElement) {
+                if (currentAudioElement.paused) {
+                    currentAudioElement.play();
+                    playPauseBtn.textContent = "⏸ Pause";
+                } else {
+                    currentAudioElement.pause();
+                    playPauseBtn.textContent = "▶ Play";
+                }
+            } else {
+                playAudioWithBoost(audioUrl);
+            }
         }
     } else {
         if (isPlayingPreset) {
@@ -774,20 +841,32 @@ function playAudioWithBoost(audioUrl) {
     if (!audioUrl) return;
     
     stopCurrentAudio();
-    
-    const audio = new Audio(audioUrl);
-    audio.crossOrigin = "anonymous";
-    audio.loop = false;
-    audio.volume = parseFloat(volumeControl.value);
+    const ytId = extractYouTubeId(audioUrl);
 
-    audio.onended = () => {
-        playPauseBtn.textContent = "▶ Play";
-    };
+    if (ytId) {
+        if (!isYtReady || !ytPlayer) {
+            setTimeout(() => playAudioWithBoost(audioUrl), 500);
+            return;
+        }
+        currentYtVideoId = ytId;
+        ytPlayer.loadVideoById(ytId);
+        ytPlayer.setVolume(parseFloat(volumeControl.value) * 100);
+        ytPlayer.playVideo();
+    } else {
+        const audio = new Audio(audioUrl);
+        audio.crossOrigin = "anonymous";
+        audio.loop = false;
+        audio.volume = parseFloat(volumeControl.value);
 
-    currentAudioElement = audio;
-    audio.play().then(() => {
-        playPauseBtn.textContent = "⏸ Pause";
-    }).catch(e => console.log("Audio playback error:", e));
+        audio.onended = () => {
+            playPauseBtn.textContent = "▶ Play";
+        };
+
+        currentAudioElement = audio;
+        audio.play().then(() => {
+            playPauseBtn.textContent = "⏸ Pause";
+        }).catch(e => console.log("Audio playback error:", e));
+    }
 }
 
 function handleSoundSelection(soundType) {
@@ -836,9 +915,15 @@ async function handleFileUpload(e) {
 }
 
 function playCustomAudioUrl(url) {
-    if (url.trim()) {
-        fileDisplay.textContent = `✓ Audio Link Ready`;
-        playAudioWithBoost(url.trim());
+    const trimmed = url.trim();
+    if (trimmed) {
+        const ytId = extractYouTubeId(trimmed);
+        if (ytId) {
+            fileDisplay.textContent = `✓ YouTube Video Link Detected`;
+        } else {
+            fileDisplay.textContent = `✓ Audio Link Ready`;
+        }
+        playAudioWithBoost(trimmed);
     } else {
         fileDisplay.textContent = "";
         stopCurrentAudio();
@@ -1145,7 +1230,7 @@ function generateTimer() {
     if (sound === 'custom') {
         customSoundSource = customAudioUrlInput.value.trim();
         if (!customSoundSource) {
-            alert("Please upload a file or paste an audio URL!");
+            alert("Please upload a file or paste an audio/YouTube URL!");
             return;
         }
     }
