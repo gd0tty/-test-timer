@@ -1,88 +1,87 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
 
-  <style>
+<title>GD0TTY'S TIMERr</title>
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+<style>
 
-    html,
-    body {
+html,
+body {
 
-      margin: 0;
-      width: 100%;
-      height: 100%;
+  margin: 0;
 
-      background: transparent;
+  width: 100%;
+  height: 100%;
 
-      overflow: hidden;
+  background: transparent;
 
-    }
+  overflow: hidden;
+}
 
-    body {
 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+body {
 
-    }
+  display: flex;
 
-    #timer {
+  align-items: center;
 
-      font-family: Inter, Arial, sans-serif;
+  justify-content: center;
+}
 
-      font-weight: 900;
 
-      font-size: 150px;
+#timer {
 
-      line-height: 1;
+  font-family: Arial, sans-serif;
 
-      white-space: nowrap;
+  font-weight: 900;
 
-      background: white;
+  font-size: 150px;
 
-      color: transparent;
+  line-height: 1;
 
-      background-clip: text;
-      -webkit-background-clip: text;
+  white-space: nowrap;
 
-      -webkit-text-fill-color: transparent;
+  color: white;
 
-      filter:
-        drop-shadow(0 4px 8px rgba(0,0,0,.5));
+  text-align: center;
 
-    }
+  background-clip: text;
 
-  </style>
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+
+  filter:
+    drop-shadow(
+      0 4px 8px rgba(0,0,0,.5)
+    );
+}
+
+</style>
 
 </head>
 
+
 <body>
 
-<div id="timer">10:00</div>
+<div id="timer">
+10:00
+</div>
 
 
 <script>
 
-const SUPABASE_URL =
-  "https://hkqieahernxlupambubz.supabase.co";
 
-/*
-  PASTE THE SAME SUPABASE PUBLISHABLE KEY HERE.
-*/
-const SUPABASE_KEY =
-  "sb_publishable_Ueiqs7cgDOi13Qj9rVL_9g_AfvCB9ht";
-
-
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
 
 
 const params =
@@ -94,11 +93,17 @@ const params =
 const paintInput =
   params.get("paint") || "";
 
+
 const font =
-  params.get("font") || "Inter";
+  params.get("font") || "Arial";
+
 
 const size =
   params.get("size") || "150";
+
+
+const startTime =
+  params.get("start") || "10:00";
 
 
 const timer =
@@ -106,34 +111,56 @@ const timer =
 
 
 timer.style.fontFamily =
-  `"${font}", Inter, Arial, sans-serif`;
+  `"${font}", Arial, sans-serif`;
+
 
 timer.style.fontSize =
   size + "px";
 
 
-let timerState = {
-  remaining_ms: 600000,
-  running: false,
-  updated_at: new Date().toISOString()
-};
+
+
+function parseTime(value) {
+
+  const parts =
+    value.split(":").map(Number);
+
+  if (parts.length !== 2) {
+    return 600000;
+  }
+
+  const minutes =
+    Number.isFinite(parts[0])
+      ? parts[0]
+      : 0;
+
+  const seconds =
+    Number.isFinite(parts[1])
+      ? parts[1]
+      : 0;
+
+  return Math.max(
+    0,
+    (minutes * 60 + seconds) * 1000
+  );
+}
+
+
+let remaining =
+  parseTime(startTime);
+
+
+
+
+const endTime =
+  Date.now() + remaining;
 
 
 function getRemaining() {
 
-  if (!timerState.running) {
-    return Number(timerState.remaining_ms);
-  }
-
-  const updated =
-    new Date(timerState.updated_at).getTime();
-
-  const elapsed =
-    Date.now() - updated;
-
   return Math.max(
     0,
-    Number(timerState.remaining_ms) - elapsed
+    endTime - Date.now()
   );
 }
 
@@ -144,7 +171,9 @@ function formatTime(ms) {
     Math.ceil(ms / 1000);
 
   const minutes =
-    Math.floor(totalSeconds / 60);
+    Math.floor(
+      totalSeconds / 60
+    );
 
   const seconds =
     totalSeconds % 60;
@@ -157,27 +186,190 @@ function formatTime(ms) {
 }
 
 
-function applyPaint(url) {
 
-  if (!url) {
 
-    timer.style.background =
+function extractPaintId(value) {
+
+  value = value.trim();
+
+  if (
+    /^[0-9A-Z]{20,40}$/i.test(value)
+  ) {
+    return value;
+  }
+
+  const match =
+    value.match(
+      /([0-9A-Z]{20,40})/i
+    );
+
+  return match ? match[1] : "";
+}
+
+
+function colorToCSS(color) {
+
+  if (typeof color === "string") {
+    return color;
+  }
+
+  if (!color) {
+    return "white";
+  }
+
+  let r = color.r ?? 255;
+  let g = color.g ?? 255;
+  let b = color.b ?? 255;
+  let a = color.a ?? 1;
+
+  if (r <= 1 && g <= 1 && b <= 1) {
+    r *= 255;
+    g *= 255;
+    b *= 255;
+  }
+
+  if (a > 1) {
+    a /= 255;
+  }
+
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+
+function gradientToCSS(gradient) {
+
+  if (!gradient) {
+    return "white";
+  }
+
+  const stops =
+    Array.isArray(gradient.stops)
+      ? gradient.stops
+      : [];
+
+  if (!stops.length) {
+    return "white";
+  }
+
+  const stopCSS =
+    stops.map(stop => {
+
+      const color =
+        colorToCSS(
+          stop.color ??
+          stop
+        );
+
+      let position = "";
+
+      if (stop.at !== undefined) {
+        position =
+          ` ${stop.at * 100}%`;
+      }
+
+      return color + position;
+
+    }).join(", ");
+
+
+  const angle =
+    gradient.angle ?? 0;
+
+
+  const repeat =
+    gradient.repeat === true;
+
+
+  const fn =
+    String(
+      gradient.function || ""
+    ).toUpperCase();
+
+
+  if (
+    fn.includes("RADIAL") ||
+    fn.includes("CIRCLE")
+  ) {
+
+    return (
+      (repeat
+        ? "repeating-radial-gradient"
+        : "radial-gradient") +
+      `(circle, ${stopCSS})`
+    );
+  }
+
+
+  return (
+    (repeat
+      ? "repeating-linear-gradient"
+      : "linear-gradient") +
+    `(${angle}deg, ${stopCSS})`
+  );
+}
+
+
+function applyPaint(paint) {
+
+  if (!paint) {
+
+    timer.style.backgroundImage =
+      "none";
+
+    timer.style.backgroundColor =
+      "white";
+
+    timer.style.color =
+      "white";
+
+    timer.style.webkitTextFillColor =
       "white";
 
     return;
   }
 
-  /*
-    A direct 7TV Paint image URL.
-  */
+
+  
 
   if (
-    url.startsWith("http://") ||
-    url.startsWith("https://")
+    Array.isArray(paint.gradients) &&
+    paint.gradients.length
+  ) {
+
+    const gradients =
+      paint.gradients
+        .map(gradientToCSS)
+        .filter(Boolean);
+
+
+    if (gradients.length) {
+
+      timer.style.backgroundImage =
+        gradients.join(", ");
+
+      timer.style.backgroundClip =
+        "text";
+
+      timer.style.webkitBackgroundClip =
+        "text";
+
+      timer.style.color =
+        "transparent";
+
+      timer.style.webkitTextFillColor =
+        "transparent";
+    }
+  }
+
+
+
+
+  else if (
+    paint.image_url
   ) {
 
     timer.style.backgroundImage =
-      `url("${url}")`;
+      `url("${paint.image_url}")`;
 
     timer.style.backgroundSize =
       "cover";
@@ -188,127 +380,213 @@ function applyPaint(url) {
     timer.style.backgroundRepeat =
       "no-repeat";
 
+    timer.style.backgroundClip =
+      "text";
+
+    timer.style.webkitBackgroundClip =
+      "text";
+
+    timer.style.color =
+      "transparent";
+
+    timer.style.webkitTextFillColor =
+      "transparent";
+  }
+
+
+  /* COLOR */
+
+  else if (
+    paint.color
+  ) {
+
+    const color =
+      colorToCSS(
+        paint.color
+      );
+
+    timer.style.backgroundImage =
+      "none";
+
+    timer.style.backgroundColor =
+      color;
+
+    timer.style.color =
+      color;
+
+    timer.style.webkitTextFillColor =
+      color;
+  }
+
+
+  
+
+  if (
+    Array.isArray(paint.shadows)
+  ) {
+
+    const shadows =
+      paint.shadows.map(shadow => {
+
+        const color =
+          colorToCSS(
+            shadow.color
+          );
+
+        const x =
+          shadow.x ?? 0;
+
+        const y =
+          shadow.y ?? 0;
+
+        const blur =
+          shadow.blur ?? 0;
+
+        return `${x}px ${y}px ${blur}px ${color}`;
+
+      });
+
+
+    if (shadows.length) {
+
+      timer.style.textShadow =
+        shadows.join(", ");
+    }
+  }
+}
+
+
+
+
+async function loadPaint() {
+
+  const paintId =
+    extractPaintId(
+      paintInput
+    );
+
+
+  if (!paintId) {
+
+    console.log(
+      "No 7TV Paint ID supplied."
+    );
+
     return;
   }
 
-  /*
-    Try to resolve a 7TV Paint ID.
-  */
 
-  fetch(
-    "https://7tv.io/v3/cosmetics"
-  )
-    .then(r => r.json())
-    .then(data => {
+  try {
 
-      let paint = null;
-
-      if (Array.isArray(data)) {
-
-        paint =
-          data.find(
-            x => x.id === url
-          );
-
-      }
-
-      if (!paint) return;
-
-      if (
-        paint.function === "URL" &&
-        paint.image_url
-      ) {
-
-        timer.style.backgroundImage =
-          `url("${paint.image_url}")`;
-
-        timer.style.backgroundSize =
-          "cover";
-
-        timer.style.backgroundPosition =
-          "center";
-
-      }
-
-    })
-    .catch(err => {
-
-      console.error(
-        "7TV Paint error:",
-        err
+    const response =
+      await fetch(
+        "https://7tv.io/v3/cosmetics"
       );
 
-    });
 
-}
-
-
-async function loadTimer() {
-
-  const { data, error } =
-    await supabaseClient
-      .from("timers")
-      .select("*")
-      .eq("id", "main")
-      .single();
-
-  if (data) {
-
-    timerState = data;
-
-  }
-
-}
-
-
-supabaseClient
-  .channel("timer-sync")
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "timers",
-      filter: "id=eq.main"
-    },
-    payload => {
-
-      if (payload.new) {
-
-        timerState =
-          payload.new;
-
-      }
-
+    if (!response.ok) {
+      throw new Error(
+        "7TV request failed"
+      );
     }
-  )
-  .subscribe();
 
 
-applyPaint(paintInput);
+    const data =
+      await response.json();
 
-loadTimer();
+
+    let paints = [];
 
 
-function updateDisplay() {
+    if (Array.isArray(data)) {
 
-  const remaining =
+      paints = data;
+
+    } else if (
+      Array.isArray(data.paints)
+    ) {
+
+      paints = data.paints;
+
+    } else if (
+      Array.isArray(data.items)
+    ) {
+
+      paints = data.items;
+    }
+
+
+    const paint =
+      paints.find(
+        item =>
+          String(item.id).toUpperCase() ===
+          paintId.toUpperCase()
+      );
+
+
+    if (!paint) {
+
+      console.error(
+        "7TV Paint not found:",
+        paintId
+      );
+
+      return;
+    }
+
+
+    applyPaint(paint);
+
+
+    console.log(
+      "7TV Paint loaded:",
+      paintId
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "7TV Paint Error:",
+      error
+    );
+  }
+}
+
+
+
+
+function updateTimer() {
+
+  const current =
     getRemaining();
 
-  timer.textContent =
-    formatTime(remaining);
 
+  timer.textContent =
+    formatTime(current);
+
+
+  if (current <= 0) {
+
+    timer.textContent =
+      "00:00";
+  }
 }
 
 
 setInterval(
-  updateDisplay,
+  updateTimer,
   100
 );
 
-updateDisplay();
+
+updateTimer();
+
+loadPaint();
 
 </script>
 
 </body>
+
 </html>
+```
