@@ -1,244 +1,878 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>GD0TTY'S TIMER</title>
 
 <style>
-*{box-sizing:border-box}
 
-body{
-    margin:0;
-    min-height:100vh;
-    font-family:Arial,Helvetica,sans-serif;
-    background:#0d0d12;
-    color:#fff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:30px;
+* {
+    box-sizing: border-box;
 }
 
-.card{
-    width:100%;
-    max-width:650px;
-    background:#17171f;
-    border:1px solid #292934;
-    border-radius:18px;
-    padding:28px;
-    box-shadow:0 20px 60px rgba(0,0,0,.45);
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
 }
 
-h1{
-    margin:0 0 8px;
-    font-size:28px;
-}
-
-.sub{
-    color:#92929f;
-    margin-bottom:25px;
-}
-
-label{
-    display:block;
-    font-size:13px;
-    font-weight:bold;
-    margin:16px 0 7px;
-}
-
-input,select{
-    width:100%;
-    padding:12px 13px;
-    border-radius:10px;
-    border:1px solid #30303b;
-    background:#101016;
-    color:white;
-    outline:none;
-    font-size:14px;
-}
-
-input:focus,select:focus{
-    border-color:#6666ff;
-}
-
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-}
-
-button{
-    width:100%;
-    margin-top:20px;
-    padding:13px;
-    border:0;
-    border-radius:10px;
-    background:#625cff;
-    color:#fff;
-    font-weight:bold;
-    font-size:15px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#746eff;
-}
-
-.status{
-    margin-top:12px;
-    min-height:20px;
-    color:#8f8f9c;
-    font-size:13px;
-}
-
-.previewBox{
-    margin-top:25px;
-    padding:25px 15px;
-    min-height:130px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+body {
+    font-family: Arial, sans-serif;
     background:
-        linear-gradient(45deg,#202028 25%,transparent 25%),
-        linear-gradient(-45deg,#202028 25%,transparent 25%),
-        linear-gradient(45deg,transparent 75%,#202028 75%),
-        linear-gradient(-45deg,transparent 75%,#202028 75%);
-    background-size:20px 20px;
-    background-position:0 0,0 10px,10px -10px,-10px 0;
-    border-radius:12px;
-    overflow:hidden;
+        radial-gradient(circle at 20% 20%, rgba(0, 200, 255, .12), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(110, 70, 255, .14), transparent 35%),
+        #070b14;
+    color: white;
 }
 
-#preview{
-    font-weight:900;
-    line-height:1;
-    text-align:center;
-    background-clip:text;
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    color:transparent;
+.container {
+    width: min(1050px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 35px 0 60px;
 }
 
-.obs{
-    margin-top:20px;
-    display:none;
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
 }
 
-.obs input{
-    margin-top:7px;
+.card {
+    background: rgba(15, 21, 35, .9);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 20px 70px rgba(0,0,0,.3);
 }
 
-.copy{
-    background:#252530;
-    margin-top:8px;
+.card h2 {
+    margin: 0 0 7px;
+    font-size: 20px;
 }
 
-.copy:hover{
-    background:#333341;
+.description {
+    color: #7f8aa0;
+    font-size: 13px;
+    margin-bottom: 24px;
 }
 
-.small{
-    margin-top:14px;
-    font-size:12px;
-    color:#70707c;
-    line-height:1.5;
+.input-group {
+    margin-bottom: 18px;
 }
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 14px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: #0a0f1c;
+    color: white;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+input:focus {
+    border-color: #00c8ff;
+    box-shadow: 0 0 0 3px rgba(0,200,255,.08);
+}
+
+input::placeholder {
+    color: #596579;
+}
+
+.generate {
+    width: 100%;
+    padding: 15px;
+    border: 0;
+    border-radius: 13px;
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    background: linear-gradient(135deg, #00bfff, #675cff);
+    transition: .2s;
+}
+
+.generate:hover {
+    transform: translateY(-2px);
+}
+
+.timer-preview {
+    height: 300px;
+    border-radius: 18px;
+    background: #050811;
+    border: 1px solid rgba(255,255,255,.06);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+.timer {
+    font-size: 90px;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+
+    color: white;
+    -webkit-text-fill-color: white;
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.paint-status {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #7f8aa0;
+}
+
+.result {
+    display: none;
+    margin-top: 18px;
+}
+
+.result-box {
+    display: flex;
+    gap: 10px;
+}
+
+.result-box input {
+    flex: 1;
+    min-width: 0;
+}
+
+.copy {
+    border: 0;
+    border-radius: 12px;
+    padding: 0 20px;
+    background: #151e30;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.copy:hover {
+    background: #1d2940;
+}
+
+.success {
+    display: none;
+    margin-top: 10px;
+    color: #62e6a5;
+    font-size: 12px;
+}
+
+@media (max-width: 800px) {
+
+    .container {
+        width: calc(100% - 25px);
+        padding-top: 20px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .timer {
+        font-size: 60px;
+    }
+}
+
 </style>
+
 </head>
 
 <body>
 
+<div class="container">
+
+<div class="grid">
+
 <div class="card">
 
-    <h1>7TV Paint Timer</h1>
-    <div class="sub">Create a transparent countdown timer using a 7TV Paint.</div>
+<h2>Timer Settings</h2>
 
-    <label>7TV Paint ID</label>
-    <input
-        id="paintId"
-        placeholder="Paste your 7TV Paint ID"
-        autocomplete="off"
-    >
+<div class="description">
+Configure your countdown timer and 7TV Paint.
+</div>
 
-    <div class="row">
+<div class="input-group">
 
-        <div>
-            <label>Countdown</label>
-            <input
-                id="countdown"
-                value="10"
-                type="number"
-                min="1"
-            >
-        </div>
+<label>7TV Paint ID</label>
 
-        <div>
-            <label>Font Size</label>
-            <input
-                id="fontSize"
-                value="120"
-                type="number"
-                min="10"
-            >
-        </div>
+<input
+id="paintUrl"
+type="text"
+placeholder="Example: 01M19D4SHRVM6MWQ4PJB9TG97T"
+oninput="updatePreview()"
 
-    </div>
+>
 
-    <label>Font</label>
-    <input
-        id="font"
-        value="Arial"
-        placeholder="Arial"
-    >
+<div
+    class="paint-status"
+    id="paintStatus"
+>
+Paste a 7TV Paint ID.
+</div>
 
-    <button id="generate">Generate OBS URL</button>
+</div>
 
-    <div class="status" id="status">
-        Enter a 7TV Paint ID to preview it.
-    </div>
+<div class="input-group">
 
-    <div class="previewBox">
-        <div id="preview">10</div>
-    </div>
+<label>Google Font</label>
 
-    <div class="obs" id="obsBox">
+<input
+id="fontName"
+type="text"
+value="Roboto"
+placeholder="Example: Poppins"
+oninput="updateFont()"
 
-        <label>OBS Browser Source URL</label>
+>
 
-        <input id="obsUrl" readonly>
+</div>
 
-        <button class="copy" id="copyBtn">
-            Copy OBS URL
-        </button>
+<div class="input-group">
 
-    </div>
+<label>Countdown Time</label>
 
-    <div class="small">
-        The OBS overlay is transparent. Put the generated URL into an OBS Browser Source.
-    </div>
+<input
+id="startTime"
+type="text"
+value="10:00"
+placeholder="10:00"
+oninput="resetPreviewTime()"
+
+>
+
+</div>
+
+<div class="input-group">
+
+<label>Font Size</label>
+
+<input
+id="fontSize"
+type="number"
+value="120"
+min="20"
+max="500"
+oninput="updateSize()"
+
+>
+
+</div>
+
+<button
+class="generate"
+onclick="generateTimer()"
+
+>
+
+Generate OBS Timer </button>
+
+<div
+    class="result"
+    id="result"
+>
+
+<div class="result-box">
+
+<input
+id="obsUrl"
+type="text"
+readonly
+
+>
+
+<button
+class="copy"
+onclick="copyUrl()"
+
+>
+
+Copy </button>
+
+</div>
+
+<div
+    class="success"
+    id="success"
+>
+✓ OBS URL copied!
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Live Preview</h2>
+
+<div class="description">
+Your 7TV Paint is applied directly to the countdown.
+</div>
+
+<div class="timer-preview">
+
+<div
+    class="timer"
+    id="timer"
+>
+10:00
+</div>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
 <script>
-const API = "https://api.7tv.dev/v3/gql";
 
-const paintCache = new Map();
+const timer =
+    document.getElementById("timer");
 
-const paintQuery = `
-query {
-    paints {
-        paints {
-            id
-            name
-            data {
-                layers {
-                    id
+const paintInput =
+    document.getElementById("paintUrl");
+
+const fontInput =
+    document.getElementById("fontName");
+
+const startInput =
+    document.getElementById("startTime");
+
+const sizeInput =
+    document.getElementById("fontSize");
+
+const paintStatus =
+    document.getElementById("paintStatus");
+
+
+let paintCache = {};
+
+let paintRequest = 0;
+
+
+
+
+const SEVENTV_GRAPHQL =
+    "https://7tv.io/v3/gql";
+
+
+async function sevenTVRequest(query) {
+
+    const response =
+        await fetch(
+            SEVENTV_GRAPHQL,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Accept":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    query: query
+                })
+            }
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "7TV API returned " +
+            response.status
+        );
+
+    }
+
+
+    const json =
+        await response.json();
+
+
+    if (json.errors) {
+
+        console.error(
+            "7TV GraphQL errors:",
+            json.errors
+        );
+
+        throw new Error(
+            "7TV GraphQL error"
+        );
+
+    }
+
+
+    return json.data;
+}
+
+
+
+function colorToCSS(color, opacity = 1) {
+
+    if (!color) {
+
+        return "rgba(255,255,255,1)";
+
+    }
+
+
+    if (typeof color === "string") {
+
+        return color;
+
+    }
+
+
+    const r =
+        Number(color.r || 0);
+
+    const g =
+        Number(color.g || 0);
+
+    const b =
+        Number(color.b || 0);
+
+    const a =
+        Number(color.a ?? 255) / 255;
+
+
+    return (
+        `rgba(${r},${g},${b},${a * opacity})`
+    );
+}
+
+
+
+
+function makeStops(stops, opacity = 1) {
+
+    if (!Array.isArray(stops)) {
+        return "";
+    }
+
+
+    return stops
+        .map(stop => {
+
+            const color =
+                colorToCSS(
+                    stop.color,
                     opacity
-                    ty {
-                        __typename
+                );
 
-                        ... on PaintLayerTypeSingleColor {
+
+            const position =
+                Number(stop.at || 0) * 100;
+
+
+            return (
+                `${color} ${position}%`
+            );
+
+        })
+        .join(", ");
+}
+
+
+
+function layerToCSS(layer) {
+
+    if (!layer || !layer.ty) {
+        return null;
+    }
+
+
+    const type =
+        layer.ty;
+
+
+    const opacity =
+        Number(
+            layer.opacity ?? 1
+        );
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeSingleColor"
+    ) {
+
+        return {
+            css:
+                `linear-gradient(` +
+                `rgba(0,0,0,0),` +
+                `${colorToCSS(type.color, opacity)}` +
+                `)`,
+
+            opacity: 1
+        };
+
+    }
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeLinearGradient"
+    ) {
+
+        const stops =
+            makeStops(
+                type.stops,
+                opacity
+            );
+
+
+        if (!stops) {
+            return null;
+        }
+
+
+        const prefix =
+            type.repeating
+                ? "repeating-"
+                : "";
+
+
+        return {
+            css:
+                `${prefix}linear-gradient(` +
+                `${type.angle || 0}deg,` +
+                `${stops})`,
+
+            opacity: 1
+        };
+
+    }
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeRadialGradient"
+    ) {
+
+        const stops =
+            makeStops(
+                type.stops,
+                opacity
+            );
+
+
+        if (!stops) {
+            return null;
+        }
+
+
+        const prefix =
+            type.repeating
+                ? "repeating-"
+                : "";
+
+
+        const shape =
+            String(
+                type.shape || "CIRCLE"
+            ).toLowerCase();
+
+
+        return {
+            css:
+                `${prefix}radial-gradient(` +
+                `${shape}, ${stops})`,
+
+            opacity: 1
+        };
+
+    }
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeImage"
+    ) {
+
+        if (
+            !Array.isArray(type.images) ||
+            !type.images.length
+        ) {
+
+            return null;
+
+        }
+
+
+        const image =
+            type.images[0];
+
+
+        if (!image || !image.url) {
+            return null;
+        }
+
+
+        return {
+            css:
+                `url("${image.url}")`,
+
+            opacity: opacity
+        };
+
+    }
+
+
+    return null;
+}
+
+
+
+
+function applyNewPaint(paint) {
+
+    if (!paint) {
+        return false;
+    }
+
+
+    const data =
+        paint.data;
+
+
+    if (
+        !data ||
+        !Array.isArray(data.layers)
+    ) {
+
+        return false;
+
+    }
+
+
+    const layers =
+        data.layers;
+
+
+    const backgrounds = [];
+
+
+  
+
+    [...layers]
+        .reverse()
+        .forEach(layer => {
+
+            const result =
+                layerToCSS(layer);
+
+
+            if (!result) {
+                return;
+            }
+
+
+            backgrounds.push(
+                result.css
+            );
+
+        });
+
+
+    if (!backgrounds.length) {
+        return false;
+    }
+
+
+    timer.style.backgroundImage =
+        backgrounds.join(", ");
+
+
+    timer.style.backgroundSize =
+        backgrounds
+            .map(() => "cover")
+            .join(", ");
+
+
+    timer.style.backgroundPosition =
+        backgrounds
+            .map(() => "center")
+            .join(", ");
+
+
+    timer.style.backgroundRepeat =
+        backgrounds
+            .map(() => "no-repeat")
+            .join(", ");
+
+
+    timer.style.color =
+        "transparent";
+
+
+    timer.style.webkitTextFillColor =
+        "transparent";
+
+
+ 
+
+    if (
+        Array.isArray(data.shadows)
+    ) {
+
+        timer.style.textShadow =
+            data.shadows
+                .map(shadow => {
+
+                    return (
+                        `${shadow.offsetX || 0}px ` +
+                        `${shadow.offsetY || 0}px ` +
+                        `${shadow.blur || 0}px ` +
+                        `${colorToCSS(shadow.color)}`
+                    );
+
+                })
+                .join(", ");
+
+    } else {
+
+        timer.style.textShadow =
+            "none";
+
+    }
+
+
+    return true;
+}
+
+
+
+async function getPaint(id) {
+
+    if (paintCache[id]) {
+
+        return paintCache[id];
+
+    }
+
+
+ 
+
+    const query = `
+
+        {
+            paints {
+                paints {
+
+                    id
+                    name
+
+                    data {
+
+                        layers {
+
+                            id
+                            opacity
+
+                            ty {
+
+                                __typename
+
+                                ... on PaintLayerTypeSingleColor {
+                                    color {
+                                        r
+                                        g
+                                        b
+                                        a
+                                        hex
+                                    }
+                                }
+
+                                ... on PaintLayerTypeLinearGradient {
+
+                                    angle
+                                    repeating
+
+                                    stops {
+                                        at
+
+                                        color {
+                                            r
+                                            g
+                                            b
+                                            a
+                                            hex
+                                        }
+                                    }
+                                }
+
+                                ... on PaintLayerTypeRadialGradient {
+
+                                    repeating
+                                    shape
+
+                                    stops {
+                                        at
+
+                                        color {
+                                            r
+                                            g
+                                            b
+                                            a
+                                            hex
+                                        }
+                                    }
+                                }
+
+                                ... on PaintLayerTypeImage {
+
+                                    images {
+                                        url
+                                        width
+                                        height
+                                        mime
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                        shadows {
+
+                            blur
+
+                            offsetX
+                            offsetY
+
                             color {
                                 r
                                 g
@@ -246,471 +880,548 @@ query {
                                 a
                                 hex
                             }
+
                         }
 
-                        ... on PaintLayerTypeLinearGradient {
-                            angle
-                            repeating
-                            stops {
-                                at
-                                color {
-                                    r
-                                    g
-                                    b
-                                    a
-                                    hex
-                                }
-                            }
-                        }
-
-                        ... on PaintLayerTypeRadialGradient {
-                            repeating
-                            shape
-                            stops {
-                                at
-                                color {
-                                    r
-                                    g
-                                    b
-                                    a
-                                    hex
-                                }
-                            }
-                        }
-
-                        ... on PaintLayerTypeImage {
-                            images {
-                                url
-                                width
-                                height
-                                mime
-                            }
-                        }
                     }
-                }
 
-                shadows {
-                    blur
-                    offsetX
-                    offsetY
-                    color {
-                        r
-                        g
-                        b
-                        a
-                        hex
-                    }
                 }
             }
         }
-    }
-}
-`;
 
-function extractPaintId(value){
-    value = String(value || "").trim();
+    `;
 
-    if(!value) return "";
 
-    try{
-        const url = new URL(value);
-
-        const parts = url.pathname
-            .split("/")
-            .filter(Boolean);
-
-        const possible = parts[parts.length - 1];
-
-        if(possible && /^[A-Za-z0-9]+$/.test(possible)){
-            return possible;
-        }
-    }catch(e){}
-
-    return value;
-}
-
-function rgba(color, opacity = 1){
-    if(!color) return "rgba(255,255,255,1)";
-
-    const a =
-        typeof color.a === "number"
-            ? color.a / 255
-            : 1;
-
-    return `rgba(
-        ${color.r || 0},
-        ${color.g || 0},
-        ${color.b || 0},
-        ${Math.max(0,Math.min(1,a * opacity))}
-    )`;
-}
-
-function stopColor(stop, opacity){
-    return rgba(stop.color, opacity);
-}
-
-function layerToCSS(layer){
-
-    const opacity =
-        typeof layer.opacity === "number"
-            ? layer.opacity
-            : 1;
-
-    const type = layer.ty;
-
-    if(!type) return null;
-
-    if(type.__typename === "PaintLayerTypeSingleColor"){
-
-        const c = rgba(type.color, opacity);
-
-        return {
-            image:`linear-gradient(${c},${c})`,
-            size:"100% 100%",
-            repeat:"no-repeat"
-        };
-    }
-
-    if(type.__typename === "PaintLayerTypeLinearGradient"){
-
-        const stops = (type.stops || [])
-            .map(s =>
-                `${stopColor(s,opacity)} ${s.at * 100}%`
-            )
-            .join(",");
-
-        const fn =
-            type.repeating
-                ? "repeating-linear-gradient"
-                : "linear-gradient";
-
-        return {
-            image:`${fn}(${type.angle || 0}deg,${stops})`,
-            size:"100% 100%",
-            repeat:"no-repeat"
-        };
-    }
-
-    if(type.__typename === "PaintLayerTypeRadialGradient"){
-
-        const stops = (type.stops || [])
-            .map(s =>
-                `${stopColor(s,opacity)} ${s.at * 100}%`
-            )
-            .join(",");
-
-        const fn =
-            type.repeating
-                ? "repeating-radial-gradient"
-                : "radial-gradient";
-
-        const shape =
-            type.shape === "ELLIPSE"
-                ? "ellipse"
-                : "circle";
-
-        return {
-            image:`${fn}(${shape},${stops})`,
-            size:"100% 100%",
-            repeat:"no-repeat"
-        };
-    }
-
-    if(type.__typename === "PaintLayerTypeImage"){
-
-        const img =
-            type.images &&
-            type.images.length
-                ? type.images[0]
-                : null;
-
-        if(!img) return null;
-
-        return {
-            image:`url("${img.url}")`,
-            size:"cover",
-            repeat:"no-repeat"
-        };
-    }
-
-    return null;
-}
-
-function paintToCSS(paint){
-
-    const layers =
-        paint?.data?.layers || [];
-
-    const rendered =
-        layers
-            .map(layerToCSS)
-            .filter(Boolean);
-
-    return {
-        images: rendered.map(x => x.image),
-        sizes: rendered.map(x => x.size),
-        repeats: rendered.map(x => x.repeat)
-    };
-}
-
-async function getPaint(id){
-
-    id = extractPaintId(id);
-
-    if(!id) throw new Error("Missing Paint ID");
-
-    if(paintCache.has(id)){
-        return paintCache.get(id);
-    }
-
-  
-
-    const response = await fetch(API,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json",
-            "Accept":"application/json"
-        },
-        body:JSON.stringify({
-            query:paintQuery
-        })
-    });
-
-    if(!response.ok){
-        throw new Error(`7TV API HTTP ${response.status}`);
-    }
-
-    const json = await response.json();
-
-    if(json.errors && json.errors.length){
-        throw new Error(
-            json.errors
-                .map(x => x.message)
-                .join(", ")
+    const data =
+        await sevenTVRequest(
+            query
         );
-    }
+
 
     const paints =
-        json?.data?.paints?.paints || [];
+        data?.paints?.paints;
+
+
+    if (!Array.isArray(paints)) {
+
+        throw new Error(
+            "7TV returned no paints."
+        );
+
+    }
+
 
     const paint =
         paints.find(
-            p => String(p.id).toLowerCase() === id.toLowerCase()
+            item =>
+                String(item.id) ===
+                String(id)
         );
 
-    if(!paint){
-        throw new Error("Paint ID not found");
+
+    if (!paint) {
+
+        throw new Error(
+            "Paint ID was not found."
+        );
+
     }
 
-    paintCache.set(id,paint);
+
+    paintCache[id] =
+        paint;
+
 
     return paint;
 }
 
-function applyPaint(element,paint){
 
-    const css = paintToCSS(paint);
 
-    element.style.backgroundImage =
-        css.images.length
-            ? css.images.join(",")
-            : "none";
 
-    element.style.backgroundSize =
-        css.sizes.length
-            ? css.sizes.join(",")
-            : "100% 100%";
+function extractPaintId(value) {
 
-    element.style.backgroundRepeat =
-        css.repeats.length
-            ? css.repeats.join(",")
-            : "no-repeat";
+    const input =
+        value.trim();
 
-    element.style.backgroundPosition =
-        css.images.map(() => "center").join(",");
 
-    const shadows =
-        paint?.data?.shadows || [];
+    if (!input) {
+        return null;
+    }
 
-    if(shadows.length){
 
-        element.style.filter =
-            shadows.map(s =>
-                `drop-shadow(
-                    ${s.offsetX || 0}px
-                    ${s.offsetY || 0}px
-                    ${s.blur || 0}px
-                    ${rgba(s.color)}
-                )`
-            ).join(" ");
-    }else{
-        element.style.filter = "none";
+   
+    if (
+        /^[A-Za-z0-9]+$/.test(input) &&
+        input.length >= 10
+    ) {
+
+        return input;
+
+    }
+
+
+   
+
+    try {
+
+        const url =
+            new URL(input);
+
+
+        const parts =
+            url.pathname
+                .split("/")
+                .filter(Boolean);
+
+
+        return (
+            parts[parts.length - 1] ||
+            null
+        );
+
+    } catch {
+
+        return null;
+
     }
 }
 
-const paintInput = document.getElementById("paintId");
-const countdownInput = document.getElementById("countdown");
-const fontSizeInput = document.getElementById("fontSize");
-const fontInput = document.getElementById("font");
-const preview = document.getElementById("preview");
-const status = document.getElementById("status");
-const obsBox = document.getElementById("obsBox");
-const obsUrl = document.getElementById("obsUrl");
 
-let currentPaint = null;
-let requestNumber = 0;
 
-function updateBasicPreview(){
+async function updatePreview() {
 
-    preview.textContent =
-        Math.max(0,parseInt(countdownInput.value) || 0);
+    const value =
+        paintInput.value.trim();
 
-    preview.style.fontSize =
-        `${Math.max(10,parseInt(fontSizeInput.value) || 120)}px`;
 
-    preview.style.fontFamily =
-        fontInput.value.trim() || "Arial";
-}
+    if (!value) {
 
-async function updatePaintPreview(){
+        timer.style.backgroundImage =
+            "none";
 
-    const id = extractPaintId(paintInput.value);
+        timer.style.color =
+            "white";
 
-    updateBasicPreview();
+        timer.style.webkitTextFillColor =
+            "white";
 
-    if(!id){
-        currentPaint = null;
-        preview.style.backgroundImage = "none";
-        preview.style.webkitTextFillColor = "#fff";
-        preview.style.color = "#fff";
-
-        status.textContent =
-            "Enter a 7TV Paint ID to preview it.";
+        paintStatus.textContent =
+            "Paste a 7TV Paint ID.";
 
         return;
     }
 
-    const request = ++requestNumber;
-
-    status.textContent = "Loading 7TV Paint...";
-
-    try{
-
-        const paint = await getPaint(id);
-
-        if(request !== requestNumber) return;
-
-        currentPaint = paint;
-
-        preview.style.webkitTextFillColor =
-            "transparent";
-
-        preview.style.color =
-            "transparent";
-
-        applyPaint(preview,paint);
-
-        status.textContent =
-            `Loaded: ${paint.name || paint.id}`;
-
-    }catch(error){
-
-        if(request !== requestNumber) return;
-
-        currentPaint = null;
-
-        preview.style.backgroundImage = "none";
-        preview.style.webkitTextFillColor = "#fff";
-        preview.style.color = "#fff";
-
-        status.textContent =
-            `7TV Paint error: ${error.message}`;
-    }
-}
-
-function buildOverlayURL(){
-
-    const base =
-        window.location.href
-            .replace(/index\.html?$/i,"")
-            .replace(/\/$/,"");
 
     const id =
-        extractPaintId(paintInput.value);
+        extractPaintId(value);
 
-    const seconds =
-        Math.max(
-            1,
-            parseInt(countdownInput.value) || 10
+
+    if (!id) {
+
+        paintStatus.textContent =
+            "Invalid 7TV Paint ID.";
+
+        return;
+
+    }
+
+
+    const request =
+        ++paintRequest;
+
+
+    paintStatus.textContent =
+        "Loading 7TV Paint...";
+
+
+    try {
+
+        const paint =
+            await getPaint(id);
+
+
+        if (request !== paintRequest) {
+            return;
+        }
+
+
+        const success =
+            applyNewPaint(paint);
+
+
+        if (!success) {
+
+            throw new Error(
+                "Paint has no renderable layers."
+            );
+
+        }
+
+
+        paintStatus.textContent =
+            `✓ Paint loaded: ${id}`;
+
+    } catch (error) {
+
+        console.error(
+            "Paint loading error:",
+            error
         );
 
-    const size =
-        Math.max(
-            10,
-            parseInt(fontSizeInput.value) || 120
-        );
 
-    const font =
-        fontInput.value.trim() || "Arial";
+        if (request !== paintRequest) {
+            return;
+        }
 
-    return `${base}/overlay.html?paint=${encodeURIComponent(id)}&time=${seconds}&size=${size}&font=${encodeURIComponent(font)}`;
+
+        paintStatus.textContent =
+            "Could not load that 7TV Paint ID.";
+
+
+        timer.style.backgroundImage =
+            "none";
+
+        timer.style.color =
+            "white";
+
+        timer.style.webkitTextFillColor =
+            "white";
+
+    }
 }
 
-document.getElementById("generate").addEventListener("click",async()=>{
 
-    const id = extractPaintId(paintInput.value);
 
-    if(!id){
-        status.textContent = "Enter a 7TV Paint ID first.";
+
+function updateFont() {
+
+    const font =
+        fontInput.value.trim();
+
+
+    if (!font) {
         return;
     }
 
-    status.textContent = "Checking Paint...";
 
-    try{
+    const old =
+        document.getElementById(
+            "googleFont"
+        );
 
-        await getPaint(id);
 
-        const url = buildOverlayURL();
-
-        obsUrl.value = url;
-        obsBox.style.display = "block";
-
-        status.textContent =
-            "Done! Add this URL as an OBS Browser Source.";
-
-    }catch(error){
-
-        status.textContent =
-            `Could not load Paint: ${error.message}`;
+    if (old) {
+        old.remove();
     }
-});
 
-document.getElementById("copyBtn").addEventListener("click",async()=>{
 
-    try{
-        await navigator.clipboard.writeText(obsUrl.value);
+    const link =
+        document.createElement("link");
 
-        document.getElementById("copyBtn").textContent =
-            "Copied!";
 
-        setTimeout(()=>{
-            document.getElementById("copyBtn").textContent =
-                "Copy OBS URL";
-        },1500);
+    link.id =
+        "googleFont";
 
-    }catch(e){
-        obsUrl.select();
-        document.execCommand("copy");
+    link.rel =
+        "stylesheet";
+
+
+    link.href =
+        "https://fonts.googleapis.com/css2?family=" +
+        encodeURIComponent(font)
+            .replace(/%20/g, "+") +
+        ":wght@100;200;300;400;500;600;700;800;900&display=swap";
+
+
+    document.head.appendChild(link);
+
+
+    timer.style.fontFamily =
+        `"${font}", sans-serif`;
+}
+
+
+
+
+function updateSize() {
+
+    const size =
+        sizeInput.value || 120;
+
+
+    timer.style.fontSize =
+        size + "px";
+}
+
+
+
+
+function parseTime(value) {
+
+    const parts =
+        value
+            .split(":")
+            .map(Number);
+
+
+    if (parts.length === 2) {
+
+        return (
+            parts[0] * 60 +
+            parts[1]
+        );
+
     }
-});
 
-paintInput.addEventListener("input",updatePaintPreview);
-countdownInput.addEventListener("input",updateBasicPreview);
-fontSizeInput.addEventListener("input",updateBasicPreview);
-fontInput.addEventListener("input",updateBasicPreview);
 
-updateBasicPreview();
+    if (parts.length === 3) {
+
+        return (
+            parts[0] * 3600 +
+            parts[1] * 60 +
+            parts[2]
+        );
+
+    }
+
+
+    return 0;
+}
+
+
+function formatTime(seconds) {
+
+    seconds =
+        Math.max(
+            0,
+            Math.floor(seconds)
+        );
+
+
+    const hours =
+        Math.floor(
+            seconds / 3600
+        );
+
+
+    const minutes =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
+
+    const secs =
+        seconds % 60;
+
+
+    if (hours > 0) {
+
+        return (
+            String(hours).padStart(2, "0") +
+            ":" +
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(secs).padStart(2, "0")
+        );
+
+    }
+
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+    );
+}
+
+
+let remaining =
+    parseTime(
+        startInput.value
+    );
+
+
+let lastTime =
+    performance.now();
+
+
+function resetPreviewTime() {
+
+    remaining =
+        parseTime(
+            startInput.value
+        );
+
+
+    lastTime =
+        performance.now();
+
+
+    timer.textContent =
+        formatTime(
+            remaining
+        );
+}
+
+
+function runTimer() {
+
+    const now =
+        performance.now();
+
+
+    const delta =
+        (now - lastTime) / 1000;
+
+
+    lastTime =
+        now;
+
+
+    if (remaining > 0) {
+
+        remaining -= delta;
+
+
+        if (remaining < 0) {
+            remaining = 0;
+        }
+
+    }
+
+
+    timer.textContent =
+        formatTime(
+            remaining
+        );
+
+
+    requestAnimationFrame(
+        runTimer
+    );
+}
+
+
+
+
+function generateTimer() {
+
+    const paint =
+        paintInput.value.trim();
+
+
+    if (!paint) {
+
+        alert(
+            "Enter a 7TV Paint ID first!"
+        );
+
+        return;
+    }
+
+
+    const font =
+        fontInput.value.trim();
+
+
+    const start =
+        startInput.value.trim();
+
+
+    const size =
+        sizeInput.value;
+
+
+    const overlay =
+        new URL(
+            "overlay.html",
+            window.location.href
+        );
+
+
+    overlay.searchParams.set(
+        "paint",
+        paint
+    );
+
+
+    overlay.searchParams.set(
+        "start",
+        start
+    );
+
+
+    overlay.searchParams.set(
+        "size",
+        size
+    );
+
+
+    overlay.searchParams.set(
+        "font",
+        font
+    );
+
+
+    overlay.searchParams.set(
+        "v",
+        Date.now()
+    );
+
+
+    document.getElementById(
+        "obsUrl"
+    ).value =
+        overlay.href;
+
+
+    document.getElementById(
+        "result"
+    ).style.display =
+        "block";
+}
+
+
+function copyUrl() {
+
+    const input =
+        document.getElementById(
+            "obsUrl"
+        );
+
+
+    navigator.clipboard.writeText(
+        input.value
+    );
+
+
+    const success =
+        document.getElementById(
+            "success"
+        );
+
+
+    success.style.display =
+        "block";
+
+
+    setTimeout(() => {
+
+        success.style.display =
+            "none";
+
+    }, 2000);
+}
+
+
+
+
+updateFont();
+
+updateSize();
+
+runTimer();
+
 </script>
 
 </body>
