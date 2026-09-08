@@ -175,6 +175,67 @@ input::placeholder {
     font-size: 12px;
 }
 
+
+/* 7TV Paint ID Help */
+
+.paint-help {
+    margin-top: 22px;
+    background: rgba(15, 21, 35, .9);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.paint-help summary {
+    padding: 18px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    list-style: none;
+}
+
+.paint-help summary::-webkit-details-marker {
+    display: none;
+}
+
+.paint-help summary::after {
+    content: "▼";
+    float: right;
+    color: #00c8ff;
+    font-size: 13px;
+    transition: .2s;
+}
+
+.paint-help[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.paint-help summary:hover {
+    color: #00c8ff;
+}
+
+.paint-help-content {
+    padding: 0 20px 20px;
+}
+
+.paint-help-content p {
+    margin: 0 0 15px;
+    color: #9aa5b8;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.paint-help-gif {
+    display: block;
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+
 /* 7Database preview */
 
 .database-preview {
@@ -229,6 +290,7 @@ input::placeholder {
     font-size: 22px;
     font-weight: 800;
 }
+
 
 @media (max-width: 800px) {
 
@@ -368,6 +430,7 @@ input::placeholder {
 
         </div>
 
+
         <div class="card">
 
             <h2>Live Preview</h2>
@@ -391,7 +454,31 @@ input::placeholder {
 
     </div>
 
- 
+
+  
+
+    <details class="paint-help">
+
+        <summary>
+            How do i copy the 7tv paint id
+        </summary>
+
+        <div class="paint-help-content">
+
+            <p>
+                Follow the steps shown in the GIF below to copy your 7TV Paint ID.
+            </p>
+
+            <img
+                class="paint-help-gif"
+                src="https://cdn.discordapp.com/attachments/1530139822746898502/1546920974149091540/ezgif-4a2756da83d31025.gif?ex=6aa189ec&is=6aa0386c&hm=40ff3d855d9da5ea7f5771afe79438b10a4eb94883dd5ea7351740ac2e12faa2&"
+                alt="How to copy a 7TV Paint ID"
+            >
+
+        </div>
+
+    </details>
+
 
     <div class="database-preview">
 
