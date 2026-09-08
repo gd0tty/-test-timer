@@ -260,25 +260,14 @@ input::placeholder {
     padding-top: 12px;
 }
 
-.file-upload-btn {
-    display: inline-block;
-    padding: 10px 14px;
-    background: #151e30;
-    border: 1px solid rgba(255,255,255,.1);
+.notice-box {
+    font-size: 11px;
+    color: #9aa5b8;
+    line-height: 1.4;
+    background: rgba(0,0,0,.2);
+    padding: 8px 12px;
     border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    text-align: center;
-    transition: .2s;
-}
-
-.file-upload-btn:hover {
-    background: #1d2940;
-    border-color: #00c8ff;
-}
-
-.file-upload-btn input {
-    display: none;
+    border-left: 3px solid #00c8ff;
 }
 
 .selected-file-display {
@@ -597,7 +586,7 @@ input::placeholder {
                     <option value="bell">Bell</option>
                     <option value="buzzer">Buzzer</option>
                     <option value="alarm">Alarm</option>
-                    <option value="custom">Custom MP3 / WAV</option>
+                    <option value="custom">Custom MP3 / WAV URL</option>
                 </select>
             </div>
 
@@ -610,13 +599,10 @@ input::placeholder {
             </div>
 
             <div class="custom-sound-inputs" id="customSoundContainer">
-                <input type="text" id="customAudioUrl" placeholder="Paste Direct Audio URL (.mp3 / .wav)..." onchange="playCustomAudioUrl(this.value)">
-                
-                <label class="file-upload-btn">
-                    📁 Upload Custom Sound File (.mp3 / .wav / .ogg)
-                    <input type="file" id="customAudioFile" accept="audio/*" onchange="handleFileUpload(event)">
-                </label>
-                
+                <input type="text" id="customAudioUrl" placeholder="Paste direct audio URL (e.g. https://.../sound.mp3)" oninput="playCustomAudioUrl(this.value)">
+                <div class="notice-box">
+                    💡 <strong>Note:</strong> OBS limits URL lengths. Use a direct web link to an <code>.mp3</code>, <code>.wav</code>, or <code>.ogg</code> file (like Discord attachment links or Catbox.moe).
+                </div>
                 <div id="fileDisplay" class="selected-file-display"></div>
             </div>
         </div>
@@ -702,7 +688,6 @@ const fileDisplay = document.getElementById("fileDisplay");
 const playPauseBtn = document.getElementById("playPauseBtn");
 const volumeControl = document.getElementById("volumeControl");
 
-let customAudioDataUrl = "";
 let currentAudioElement = null;
 let audioCtx = null;
 let currentGainNode = null;
@@ -747,7 +732,7 @@ function togglePlayPause() {
     if (soundType === 'none') return;
 
     if (soundType === 'custom') {
-        const audioUrl = customAudioDataUrl || customAudioUrlInput.value.trim();
+        const audioUrl = customAudioUrlInput.value.trim();
         if (!audioUrl) return;
 
         if (currentAudioElement) {
@@ -795,8 +780,8 @@ function handleSoundSelection(soundType) {
     
     if (soundType === 'custom') {
         customContainer.style.display = 'flex';
-        if (customAudioDataUrl || customAudioUrlInput.value) {
-            playCustomAudioUrl(customAudioDataUrl || customAudioUrlInput.value);
+        if (customAudioUrlInput.value) {
+            playCustomAudioUrl(customAudioUrlInput.value);
         }
     } else {
         customContainer.style.display = 'none';
@@ -806,26 +791,13 @@ function handleSoundSelection(soundType) {
     }
 }
 
-function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    fileDisplay.textContent = `✓ Selected File: ${file.name}`;
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        customAudioDataUrl = evt.target.result;
-        customAudioUrlInput.value = "";
-        playAudioWithBoost(customAudioDataUrl);
-    };
-    reader.readAsDataURL(file);
-}
-
 function playCustomAudioUrl(url) {
     if (url.trim()) {
-        fileDisplay.textContent = `✓ Audio Link Active`;
-        customAudioDataUrl = ""; 
+        fileDisplay.textContent = `✓ Audio Link Ready`;
         playAudioWithBoost(url.trim());
+    } else {
+        fileDisplay.textContent = "";
+        stopCurrentAudio();
     }
 }
 
@@ -1127,9 +1099,9 @@ function generateTimer() {
     let customSoundSource = "";
 
     if (sound === 'custom') {
-        customSoundSource = customAudioDataUrl || customAudioUrlInput.value.trim();
+        customSoundSource = customAudioUrlInput.value.trim();
         if (!customSoundSource) {
-            alert("Please upload an audio file or enter a direct audio URL!");
+            alert("Please paste a direct audio URL!");
             return;
         }
     }
