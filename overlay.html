@@ -6,60 +6,40 @@
 
 <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0">
 
-<title>GD0TTY'S TIMERr</title>
+<title>GD0TTY'S Timer</title>
 
 <style>
 
 html,
-body {
-
-  margin: 0;
-
-  width: 100%;
-  height: 100%;
-
-  background: transparent;
-
-  overflow: hidden;
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:transparent;
+  overflow:hidden;
 }
 
-
-body {
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
+body{
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
+#timer{
+  font-family:Arial,sans-serif;
+  font-weight:900;
+  font-size:150px;
+  line-height:1;
+  white-space:nowrap;
+  text-align:center;
 
-#timer {
+  background-clip:text;
+  -webkit-background-clip:text;
 
-  font-family: Arial, sans-serif;
-
-  font-weight: 900;
-
-  font-size: 150px;
-
-  line-height: 1;
-
-  white-space: nowrap;
-
-  color: white;
-
-  text-align: center;
-
-  background-clip: text;
-
-  -webkit-background-clip: text;
-
-  -webkit-text-fill-color: transparent;
+  color:white;
 
   filter:
     drop-shadow(
@@ -71,7 +51,6 @@ body {
 
 </head>
 
-
 <body>
 
 <div id="timer">
@@ -80,7 +59,6 @@ body {
 
 
 <script>
-
 
 
 
@@ -111,8 +89,7 @@ const timer =
 
 
 timer.style.fontFamily =
-  `"${font}", Arial, sans-serif`;
-
+  `"${font}",Arial,sans-serif`;
 
 timer.style.fontSize =
   size + "px";
@@ -120,12 +97,12 @@ timer.style.fontSize =
 
 
 
-function parseTime(value) {
+function parseTime(value){
 
   const parts =
     value.split(":").map(Number);
 
-  if (parts.length !== 2) {
+  if(parts.length !== 2){
     return 600000;
   }
 
@@ -146,74 +123,74 @@ function parseTime(value) {
 }
 
 
-let remaining =
+const duration =
   parseTime(startTime);
 
 
-
-
 const endTime =
-  Date.now() + remaining;
+  Date.now() + duration;
 
 
-function getRemaining() {
+function formatTime(ms){
 
-  return Math.max(
-    0,
-    endTime - Date.now()
-  );
-}
-
-
-function formatTime(ms) {
-
-  const totalSeconds =
+  const total =
     Math.ceil(ms / 1000);
 
   const minutes =
-    Math.floor(
-      totalSeconds / 60
-    );
+    Math.floor(total / 60);
 
   const seconds =
-    totalSeconds % 60;
+    total % 60;
 
   return (
-    String(minutes).padStart(2, "0") +
+    String(minutes).padStart(2,"0") +
     ":" +
-    String(seconds).padStart(2, "0")
+    String(seconds).padStart(2,"0")
   );
 }
 
 
+function updateTimer(){
 
-
-function extractPaintId(value) {
-
-  value = value.trim();
-
-  if (
-    /^[0-9A-Z]{20,40}$/i.test(value)
-  ) {
-    return value;
-  }
-
-  const match =
-    value.match(
-      /([0-9A-Z]{20,40})/i
+  const remaining =
+    Math.max(
+      0,
+      endTime - Date.now()
     );
 
-  return match ? match[1] : "";
+  timer.textContent =
+    formatTime(remaining);
 }
 
 
-function colorToCSS(color) {
+setInterval(
+  updateTimer,
+  100
+);
 
-  if (typeof color === "string") {
+updateTimer();
+
+
+
+
+function getPaintId(value){
+
+  value = value.trim();
+
+  const match =
+    value.match(/[0-9A-Z]{20,40}/i);
+
+  return match ? match[0] : "";
+}
+
+
+function colorToCSS(color){
+
+  if(typeof color === "string"){
     return color;
   }
 
-  if (!color) {
+  if(!color){
     return "white";
   }
 
@@ -222,13 +199,13 @@ function colorToCSS(color) {
   let b = color.b ?? 255;
   let a = color.a ?? 1;
 
-  if (r <= 1 && g <= 1 && b <= 1) {
+  if(r <= 1 && g <= 1 && b <= 1){
     r *= 255;
     g *= 255;
     b *= 255;
   }
 
-  if (a > 1) {
+  if(a > 1){
     a /= 255;
   }
 
@@ -236,10 +213,10 @@ function colorToCSS(color) {
 }
 
 
-function gradientToCSS(gradient) {
+function gradientToCSS(gradient){
 
-  if (!gradient) {
-    return "white";
+  if(!gradient){
+    return null;
   }
 
   const stops =
@@ -247,38 +224,35 @@ function gradientToCSS(gradient) {
       ? gradient.stops
       : [];
 
-  if (!stops.length) {
-    return "white";
+  if(!stops.length){
+    return null;
   }
 
-  const stopCSS =
+  const cssStops =
     stops.map(stop => {
 
       const color =
         colorToCSS(
-          stop.color ??
-          stop
+          stop.color ?? stop
         );
 
       let position = "";
 
-      if (stop.at !== undefined) {
+      if(stop.at !== undefined){
         position =
           ` ${stop.at * 100}%`;
       }
 
       return color + position;
 
-    }).join(", ");
+    }).join(",");
 
 
   const angle =
     gradient.angle ?? 0;
 
-
   const repeat =
     gradient.repeat === true;
-
 
   const fn =
     String(
@@ -286,16 +260,16 @@ function gradientToCSS(gradient) {
     ).toUpperCase();
 
 
-  if (
+  if(
     fn.includes("RADIAL") ||
     fn.includes("CIRCLE")
-  ) {
+  ){
 
     return (
       (repeat
         ? "repeating-radial-gradient"
         : "radial-gradient") +
-      `(circle, ${stopCSS})`
+      `(circle,${cssStops})`
     );
   }
 
@@ -304,37 +278,40 @@ function gradientToCSS(gradient) {
     (repeat
       ? "repeating-linear-gradient"
       : "linear-gradient") +
-    `(${angle}deg, ${stopCSS})`
+    `(${angle}deg,${cssStops})`
   );
 }
 
 
-function applyPaint(paint) {
+function applyPaint(paint){
 
-  if (!paint) {
+  timer.style.backgroundImage =
+    "none";
 
-    timer.style.backgroundImage =
-      "none";
+  timer.style.backgroundColor =
+    "transparent";
 
-    timer.style.backgroundColor =
-      "white";
+  timer.style.color =
+    "white";
 
-    timer.style.color =
-      "white";
+  timer.style.webkitTextFillColor =
+    "white";
 
-    timer.style.webkitTextFillColor =
-      "white";
+  timer.style.textShadow =
+    "none";
 
+
+  if(!paint){
     return;
   }
 
 
-  
+ 
 
-  if (
+  if(
     Array.isArray(paint.gradients) &&
     paint.gradients.length
-  ) {
+  ){
 
     const gradients =
       paint.gradients
@@ -342,10 +319,10 @@ function applyPaint(paint) {
         .filter(Boolean);
 
 
-    if (gradients.length) {
+    if(gradients.length){
 
       timer.style.backgroundImage =
-        gradients.join(", ");
+        gradients.join(",");
 
       timer.style.backgroundClip =
         "text";
@@ -362,11 +339,9 @@ function applyPaint(paint) {
   }
 
 
+  
 
-
-  else if (
-    paint.image_url
-  ) {
+  else if(paint.image_url){
 
     timer.style.backgroundImage =
       `url("${paint.image_url}")`;
@@ -394,22 +369,14 @@ function applyPaint(paint) {
   }
 
 
-  /* COLOR */
+  
 
-  else if (
-    paint.color
-  ) {
+  else if(paint.color){
 
     const color =
       colorToCSS(
         paint.color
       );
-
-    timer.style.backgroundImage =
-      "none";
-
-    timer.style.backgroundColor =
-      color;
 
     timer.style.color =
       color;
@@ -421,9 +388,7 @@ function applyPaint(paint) {
 
   
 
-  if (
-    Array.isArray(paint.shadows)
-  ) {
+  if(Array.isArray(paint.shadows)){
 
     const shadows =
       paint.shadows.map(shadow => {
@@ -433,24 +398,20 @@ function applyPaint(paint) {
             shadow.color
           );
 
-        const x =
-          shadow.x ?? 0;
-
-        const y =
-          shadow.y ?? 0;
-
-        const blur =
-          shadow.blur ?? 0;
-
-        return `${x}px ${y}px ${blur}px ${color}`;
+        return (
+          `${shadow.x ?? 0}px ` +
+          `${shadow.y ?? 0}px ` +
+          `${shadow.blur ?? 0}px ` +
+          `${color}`
+        );
 
       });
 
 
-    if (shadows.length) {
+    if(shadows.length){
 
       timer.style.textShadow =
-        shadows.join(", ");
+        shadows.join(",");
     }
   }
 }
@@ -458,25 +419,18 @@ function applyPaint(paint) {
 
 
 
-async function loadPaint() {
+async function loadPaint(){
 
-  const paintId =
-    extractPaintId(
-      paintInput
-    );
+  const id =
+    getPaintId(paintInput);
 
 
-  if (!paintId) {
-
-    console.log(
-      "No 7TV Paint ID supplied."
-    );
-
+  if(!id){
     return;
   }
 
 
-  try {
+  try{
 
     const response =
       await fetch(
@@ -484,7 +438,7 @@ async function loadPaint() {
       );
 
 
-    if (!response.ok) {
+    if(!response.ok){
       throw new Error(
         "7TV request failed"
       );
@@ -498,20 +452,15 @@ async function loadPaint() {
     let paints = [];
 
 
-    if (Array.isArray(data)) {
-
+    if(Array.isArray(data)){
       paints = data;
+    }
 
-    } else if (
-      Array.isArray(data.paints)
-    ) {
-
+    else if(Array.isArray(data.paints)){
       paints = data.paints;
+    }
 
-    } else if (
-      Array.isArray(data.items)
-    ) {
-
+    else if(Array.isArray(data.items)){
       paints = data.items;
     }
 
@@ -520,15 +469,15 @@ async function loadPaint() {
       paints.find(
         item =>
           String(item.id).toUpperCase() ===
-          paintId.toUpperCase()
+          id.toUpperCase()
       );
 
 
-    if (!paint) {
+    if(!paint){
 
       console.error(
         "7TV Paint not found:",
-        paintId
+        id
       );
 
       return;
@@ -538,13 +487,7 @@ async function loadPaint() {
     applyPaint(paint);
 
 
-    console.log(
-      "7TV Paint loaded:",
-      paintId
-    );
-
-
-  } catch (error) {
+  }catch(error){
 
     console.error(
       "7TV Paint Error:",
@@ -554,34 +497,6 @@ async function loadPaint() {
 }
 
 
-
-
-function updateTimer() {
-
-  const current =
-    getRemaining();
-
-
-  timer.textContent =
-    formatTime(current);
-
-
-  if (current <= 0) {
-
-    timer.textContent =
-      "00:00";
-  }
-}
-
-
-setInterval(
-  updateTimer,
-  100
-);
-
-
-updateTimer();
-
 loadPaint();
 
 </script>
@@ -589,4 +504,3 @@ loadPaint();
 </body>
 
 </html>
-```
