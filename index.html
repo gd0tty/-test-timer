@@ -333,11 +333,8 @@ input::placeholder {
 
 <script>
 
-
 const SEVENTV_API =
     "https://7tv.io/v4/gql";
-
-
 
 
 const PAINT_QUERY = `
@@ -413,6 +410,7 @@ query {
                                 width
                                 height
                                 mime
+                                frameCount
                             }
 
                         }
@@ -442,7 +440,6 @@ query {
 `;
 
 
-
 const timer =
     document.getElementById("timer");
 
@@ -459,8 +456,6 @@ const sizeInput =
     document.getElementById("fontSize");
 
 
-
-
 function extractPaintId(value) {
 
     value =
@@ -470,16 +465,11 @@ function extractPaintId(value) {
         return "";
     }
 
-   
-
     if (
         /^[A-Za-z0-9]+$/.test(value)
     ) {
         return value;
     }
-
-
-  
 
     try {
 
@@ -506,23 +496,17 @@ function extractPaintId(value) {
 
     } catch (error) {
 
-        
-
     }
 
     return value;
 }
 
 
-
 function colorToRGBA(color, opacity = 1) {
 
     if (!color) {
-
         return "rgba(255,255,255,1)";
-
     }
-
 
     const alpha =
         typeof color.a === "number"
@@ -552,7 +536,6 @@ function colorToRGBA(color, opacity = 1) {
 }
 
 
-
 function convertPaintLayer(layer) {
 
     if (!layer || !layer.ty) {
@@ -568,7 +551,6 @@ function convertPaintLayer(layer) {
             : 1;
 
 
-
     if (
         type.__typename ===
         "PaintLayerTypeSingleColor"
@@ -581,6 +563,7 @@ function convertPaintLayer(layer) {
             );
 
         return {
+
             image:
                 `linear-gradient(${color},${color})`,
 
@@ -589,11 +572,10 @@ function convertPaintLayer(layer) {
 
             repeat:
                 "no-repeat"
+
         };
 
     }
-
-
 
 
     if (
@@ -612,7 +594,7 @@ function convertPaintLayer(layer) {
                         );
 
                     const position =
-                        (stop.at * 100);
+                        stop.at * 100;
 
                     return (
                         color +
@@ -647,7 +629,6 @@ function convertPaintLayer(layer) {
         };
 
     }
-
 
 
     if (
@@ -706,18 +687,24 @@ function convertPaintLayer(layer) {
     }
 
 
-
-
     if (
         type.__typename ===
         "PaintLayerTypeImage"
     ) {
 
+        const images =
+            type.images || [];
+
+
+        
         const image =
-            type.images &&
-            type.images.length
-                ? type.images[0]
-                : null;
+            images
+                .slice()
+                .sort(
+                    (a, b) =>
+                        (b.frameCount || 1) -
+                        (a.frameCount || 1)
+                )[0] || null;
 
 
         if (!image) {
@@ -745,25 +732,19 @@ function convertPaintLayer(layer) {
 }
 
 
-
-
 function applyPaint(paint) {
 
     if (
         !paint ||
         !paint.data
     ) {
-
         return;
-
     }
 
 
     const layers =
         paint.data.layers || [];
 
-
-   
 
     const rendered =
         layers
@@ -783,7 +764,6 @@ function applyPaint(paint) {
             "white";
 
         return;
-
     }
 
 
@@ -811,16 +791,12 @@ function applyPaint(paint) {
             .join(",");
 
 
-   
-
     timer.style.color =
         "transparent";
 
     timer.style.webkitTextFillColor =
         "transparent";
 
-
- 
 
     const shadows =
         paint.data.shadows || [];
@@ -857,8 +833,6 @@ function applyPaint(paint) {
 }
 
 
-
-
 let paintRequestNumber = 0;
 
 let paintCache =
@@ -880,7 +854,6 @@ async function getPaint(paintId) {
     }
 
 
- 
     if (
         paintCache.has(paintId)
     ) {
@@ -992,12 +965,10 @@ async function getPaint(paintId) {
 }
 
 
-
 async function updatePreview() {
 
     const value =
         paintInput.value.trim();
-
 
 
     if (!value) {
@@ -1015,7 +986,6 @@ async function updatePreview() {
             "none";
 
         return;
-
     }
 
 
@@ -1027,7 +997,6 @@ async function updatePreview() {
         ++paintRequestNumber;
 
 
-   
     timer.style.color =
         "white";
 
@@ -1043,15 +1012,11 @@ async function updatePreview() {
             );
 
 
-     
-
         if (
             request !==
             paintRequestNumber
         ) {
-
             return;
-
         }
 
 
@@ -1066,9 +1031,7 @@ async function updatePreview() {
             request !==
             paintRequestNumber
         ) {
-
             return;
-
         }
 
 
@@ -1093,7 +1056,6 @@ async function updatePreview() {
     }
 
 }
-
 
 
 function updateFont() {
@@ -1147,7 +1109,6 @@ function updateFont() {
 }
 
 
-
 function updateSize() {
 
     const size =
@@ -1157,8 +1118,6 @@ function updateSize() {
     timer.style.fontSize =
         size + "px";
 }
-
-
 
 
 function parseTime(value) {
@@ -1196,8 +1155,6 @@ function parseTime(value) {
 
     return 0;
 }
-
-
 
 
 function formatTime(seconds) {
@@ -1251,7 +1208,6 @@ function formatTime(seconds) {
             .padStart(2, "0")
     );
 }
-
 
 
 let remaining =
@@ -1333,8 +1289,6 @@ function runTimer() {
 runTimer();
 
 
-
-
 function generateTimer() {
 
     const paint =
@@ -1395,8 +1349,6 @@ function generateTimer() {
     );
 
 
- 
-
     overlay.searchParams.set(
         "v",
         Date.now()
@@ -1414,8 +1366,6 @@ function generateTimer() {
     ).style.display =
         "block";
 }
-
-
 
 
 function copyUrl() {
@@ -1448,8 +1398,6 @@ function copyUrl() {
 
     }, 2000);
 }
-
-
 
 
 updateFont();
