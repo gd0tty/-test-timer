@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,8 +18,8 @@
       min-height: 100vh;
       font-family: Arial, sans-serif;
       background:
-        radial-gradient(circle at 20% 20%, rgba(0, 200, 255, .15), transparent 35%),
-        radial-gradient(circle at 80% 80%, rgba(120, 70, 255, .15), transparent 35%),
+        radial-gradient(circle at 20% 20%, rgba(0,200,255,.15), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(120,70,255,.15), transparent 35%),
         #080b12;
       color: white;
       padding: 40px 20px;
@@ -26,7 +27,7 @@
 
     .container {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1100px;
       margin: auto;
     }
 
@@ -42,22 +43,19 @@
       margin-bottom: 35px;
     }
 
+    .card {
+      background: rgba(18,23,35,.88);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-    }
-
-    .card {
-      background: rgba(18, 23, 35, .85);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
-    }
-
-    .full {
-      grid-column: 1 / -1;
     }
 
     h2 {
@@ -90,20 +88,55 @@
       padding: 13px 18px;
       margin: 5px;
       color: white;
-      background: linear-gradient(135deg, #06b6d4, #6366f1);
+      background: linear-gradient(135deg,#06b6d4,#6366f1);
       cursor: pointer;
       font-weight: bold;
+      transition: .15s ease;
     }
 
     button:hover {
-      transform: translateY(-1px);
       filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .controls {
       display: flex;
       flex-wrap: wrap;
       gap: 5px;
+    }
+
+    .auth {
+      max-width: 500px;
+      margin: 0 auto 20px;
+    }
+
+    .auth-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .user-info {
+      display: none;
+      margin-top: 15px;
+      color: #94a3b8;
+      word-break: break-all;
+    }
+
+    .logout {
+      background: #ef4444;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 15px;
+      color: #94a3b8;
     }
 
     .output {
@@ -114,19 +147,125 @@
       background: #0b101a;
     }
 
-    .status {
+    
+
+    .preview-card {
+      margin-bottom: 20px;
+    }
+
+    .preview-area {
+      position: relative;
+      min-height: 280px;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #090d16,
+          #111827
+        );
+
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .preview-grid {
+      position: absolute;
+      inset: 0;
+
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+
+      background-size: 30px 30px;
+
+      pointer-events: none;
+    }
+
+    .preview-label {
+      position: absolute;
+      top: 12px;
+      left: 15px;
+      z-index: 3;
+
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #timerPreview {
+      position: relative;
+      z-index: 2;
+
+      font-weight: 900;
+      line-height: 1;
+
+      white-space: nowrap;
+
+      color: white;
+
+      font-family: Arial, sans-serif;
+
       text-align: center;
-      margin-top: 15px;
+
+      user-select: none;
+
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .preview-placeholder {
+      position: absolute;
+      z-index: 2;
+
+      text-align: center;
+
+      color: #64748b;
+
+      font-size: 14px;
+
+      pointer-events: none;
+    }
+
+    .paint-status {
+      margin-top: 10px;
+
+      font-size: 13px;
+
+      text-align: center;
+
       color: #94a3b8;
     }
 
-    @media(max-width: 750px) {
+    .paint-status.success {
+      color: #4ade80;
+    }
+
+    .paint-status.error {
+      color: #f87171;
+    }
+
+    .locked {
+      opacity: .55;
+    }
+
+    @media(max-width:750px) {
       .grid {
         grid-template-columns: 1fr;
       }
 
-      .full {
-        grid-column: auto;
+      h1 {
+        font-size: 34px;
+      }
+
+      #timerPreview {
+        max-width: 95%;
+        overflow: hidden;
+        text-overflow: clip;
       }
     }
   </style>
@@ -137,79 +276,278 @@
 <div class="container">
 
   <h1>Timer Generator</h1>
-  <div class="subtitle">Create an OBS timer with 7TV Paint effects</div>
+
+  <div class="subtitle">
+    Create and control your OBS timer
+  </div>
+
+
+  
+
+  <div class="card auth">
+
+    <h2>🔐 Controller Login</h2>
+
+    <label>Email</label>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Your email"
+    >
+
+    <label>Password</label>
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Your password"
+    >
+
+    <div class="auth-buttons">
+
+      <button onclick="signIn()">
+        Login
+      </button>
+
+      <button onclick="signUp()">
+        Create Account
+      </button>
+
+      <button
+        id="logoutButton"
+        class="logout"
+        onclick="signOut()"
+        style="display:none;"
+      >
+        Logout
+      </button>
+
+    </div>
+
+    <div
+      id="userInfo"
+      class="user-info"
+    ></div>
+
+    <div
+      id="authStatus"
+      class="status"
+    >
+      Not logged in
+    </div>
+
+  </div>
+
+
+ 
+
+  <div class="card preview-card">
+
+    <h2>👀 Live Preview</h2>
+
+    <div class="preview-area">
+
+      <div class="preview-grid"></div>
+
+      <div class="preview-label">
+        7TV Paint Preview
+      </div>
+
+      <div
+        id="timerPreview"
+      >
+        10:00
+      </div>
+
+      <div
+        id="previewPlaceholder"
+        class="preview-placeholder"
+        style="display:none;"
+      >
+        Paste a 7TV Paint ID or URL to preview it
+      </div>
+
+    </div>
+
+    <div
+      id="paintStatus"
+      class="paint-status"
+    >
+      No paint loaded — using normal text
+    </div>
+
+  </div>
+
 
   <div class="grid">
 
+    
+
     <div class="card">
 
-      <h2>Timer Settings</h2>
+      <h2>🎨 Timer Settings</h2>
 
       <label>7TV Paint ID or URL</label>
-      <input id="paint" placeholder="Paste 7TV Paint ID or URL">
+
+      <input
+        id="paint"
+        placeholder="Paste 7TV Paint ID or URL"
+        oninput="updatePreview()"
+      >
 
       <label>Google Font</label>
-      <input id="font" value="Arial">
+
+      <input
+        id="font"
+        value="Arial"
+        oninput="updatePreview()"
+      >
 
       <label>Countdown Time</label>
-      <input id="time" value="10:00">
+
+      <input
+        id="time"
+        value="10:00"
+        oninput="updatePreview()"
+      >
 
       <label>Font Size</label>
-      <input id="size" type="number" value="150">
+
+      <input
+        id="size"
+        type="number"
+        value="150"
+        oninput="updatePreview()"
+      >
 
       <button onclick="generateTimer()">
         Generate OBS Timer
       </button>
 
-      <div class="output" id="output">
-        <label>OBS Browser Source URL</label>
-        <input id="obsUrl" readonly>
 
-        <button onclick="copyUrl()">Copy URL</button>
+      <div
+        class="output"
+        id="output"
+      >
+
+        <label>
+          OBS Browser Source URL
+        </label>
+
+        <input
+          id="obsUrl"
+          readonly
+        >
+
+        <button onclick="copyUrl()">
+          Copy URL
+        </button>
+
       </div>
 
     </div>
 
 
-    <div class="card">
+   
 
-      <h2>Timer Controls</h2>
+    <div
+      class="card"
+      id="controlsCard"
+    >
+
+      <h2>🎛️ Timer Controls</h2>
 
       <div class="controls">
-        <button onclick="startTimer()">▶ Start</button>
-        <button onclick="pauseTimer()">⏸ Pause</button>
-        <button onclick="addTime(10000)">+10 Seconds</button>
-        <button onclick="addTime(-10000)">-10 Seconds</button>
-        <button onclick="resetTimer()">Reset</button>
+
+        <button
+          id="startButton"
+          onclick="startTimer()"
+          disabled
+        >
+          ▶ Start
+        </button>
+
+        <button
+          id="pauseButton"
+          onclick="pauseTimer()"
+          disabled
+        >
+          ⏸ Pause
+        </button>
+
+        <button
+          id="addButton"
+          onclick="addTime(10000)"
+          disabled
+        >
+          +10 Seconds
+        </button>
+
+        <button
+          id="removeButton"
+          onclick="addTime(-10000)"
+          disabled
+        >
+          -10 Seconds
+        </button>
+
+        <button
+          id="resetButton"
+          onclick="resetTimer()"
+          disabled
+        >
+          Reset
+        </button>
+
       </div>
 
-      <label>Set Exact Time</label>
-      <input id="exactTime" placeholder="Example: 5:00">
 
-      <button onclick="setExactTime()">
+      <label>
+        Set Exact Time
+      </label>
+
+      <input
+        id="exactTime"
+        placeholder="Example: 5:00"
+      >
+
+      <button
+        id="exactButton"
+        onclick="setExactTime()"
+        disabled
+      >
         Set Time
       </button>
 
-      <div class="status" id="status">
-        Connecting...
+
+      <div
+        id="status"
+        class="status"
+      >
+        Login to control the timer
       </div>
 
     </div>
 
   </div>
+
 </div>
 
 
 <script>
 
+
+
 const SUPABASE_URL =
   "https://hkqieahernxlupambubz.supabase.co";
 
-/*
-  PASTE YOUR SUPABASE PUBLISHABLE KEY BETWEEN THE QUOTES BELOW.
-*/
+
+
+
 const SUPABASE_KEY =
   "sb_publishable_Ueiqs7cgDOi13Qj9rVL_9g_AfvCB9ht";
+
 
 const supabaseClient =
   window.supabase.createClient(
@@ -218,52 +556,1211 @@ const supabaseClient =
   );
 
 
+
+
 let timerState = {
+
   id: "main",
+
   remaining_ms: 600000,
+
   running: false,
-  updated_at: new Date().toISOString()
+
+  updated_at:
+    new Date().toISOString()
+
 };
+
+
+
+
+let previewSeconds =
+  parseTime(
+    document.getElementById("time").value
+  ) / 1000;
+
+
+let previewRunning =
+  false;
+
+
+let previewLastTick =
+  Date.now();
+
+
+
+
+function extractPaintId(value) {
+
+  value =
+    String(value || "").trim();
+
+
+  if (!value) {
+    return "";
+  }
+
+
+  
+
+  if (
+    /^[a-zA-Z0-9_-]{10,}$/.test(value)
+  ) {
+
+    return value;
+
+  }
+
+
+  
+  try {
+
+    const url =
+      new URL(value);
+
+
+    const parts =
+      url.pathname
+        .split("/")
+        .filter(Boolean);
+
+
+   
+
+    if (parts.length) {
+
+      return parts[
+        parts.length - 1
+      ];
+
+    }
+
+  } catch (error) {
+
+   
+  }
+
+
+  return value;
+
+}
+
+
+
+function sevenTVColorToCSS(value) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+
+    return "rgba(255,255,255,1)";
+
+  }
+
+
+  let number =
+    Number(value);
+
+
+  if (
+    !Number.isFinite(number)
+  ) {
+
+    return "rgba(255,255,255,1)";
+
+  }
+
+
+  
+
+  number =
+    number >>> 0;
+
+
+  const r =
+    (number >>> 24) & 255;
+
+  const g =
+    (number >>> 16) & 255;
+
+  const b =
+    (number >>> 8) & 255;
+
+  const a =
+    number & 255;
+
+
+  return `rgba(${r},${g},${b},${(
+    a / 255
+  ).toFixed(3)})`;
+
+}
+
+
+
+
+function paintGradientToCSS(
+  gradient
+) {
+
+  if (!gradient) {
+
+    return "";
+
+  }
+
+
+  const stops =
+    gradient.stops || [];
+
+
+  if (!stops.length) {
+
+    return "";
+
+  }
+
+
+  const stopString =
+    stops
+      .slice()
+      .sort(
+        (a,b) =>
+          Number(a.at || 0) -
+          Number(b.at || 0)
+      )
+      .map(stop => {
+
+        const position =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              Number(stop.at || 0)
+            )
+          ) * 100;
+
+
+        return (
+          sevenTVColorToCSS(
+            stop.color
+          ) +
+          " " +
+          position +
+          "%"
+        );
+
+      })
+      .join(", ");
+
+
+  const functionName =
+    String(
+      gradient.function ||
+      "LINEAR_GRADIENT"
+    ).toUpperCase();
+
+
+  if (
+    functionName.includes(
+      "RADIAL"
+    )
+  ) {
+
+    return (
+      `radial-gradient(` +
+      `${gradient.shape || "circle"}, ` +
+      `${stopString})`
+    );
+
+  }
+
+
+  const angle =
+    gradient.angle !== undefined
+      ? gradient.angle
+      : 90;
+
+
+  if (
+    functionName.includes(
+      "REPEATING"
+    )
+  ) {
+
+    return (
+      `repeating-linear-gradient(` +
+      `${angle}deg, ` +
+      `${stopString})`
+    );
+
+  }
+
+
+  return (
+    `linear-gradient(` +
+    `${angle}deg, ` +
+    `${stopString})`
+  );
+
+}
+
+
+
+
+function applyPaint(
+  paint
+) {
+
+  const preview =
+    document.getElementById(
+      "timerPreview"
+    );
+
+
+  const status =
+    document.getElementById(
+      "paintStatus"
+    );
+
+
+  if (!paint) {
+
+    preview.style.backgroundImage =
+      "";
+
+    preview.style.backgroundColor =
+      "";
+
+    preview.style.color =
+      "white";
+
+    preview.style.webkitTextFillColor =
+      "white";
+
+    preview.style.filter =
+      "";
+
+    preview.style.textShadow =
+      "";
+
+    preview.style.webkitTextStroke =
+      "";
+
+    status.textContent =
+      "No paint loaded — using normal text";
+
+    status.className =
+      "paint-status";
+
+    return;
+
+  }
+
+
+  
+
+  let gradients =
+    paint.gradients || [];
+
+
+  if (
+    !gradients.length &&
+    paint.function
+  ) {
+
+    gradients = [{
+
+      function:
+        paint.function,
+
+      shape:
+        paint.shape,
+
+      image_url:
+        paint.image_url,
+
+      stops:
+        paint.stops || [],
+
+      angle:
+        paint.angle,
+
+      repeat:
+        paint.repeat
+
+    }];
+
+  }
+
+
+  const cssGradients =
+    gradients
+      .map(
+        paintGradientToCSS
+      )
+      .filter(Boolean);
+
+
+  
+  if (
+    paint.image_url &&
+    (
+      String(
+        paint.function || ""
+      ).toUpperCase()
+        .includes("URL")
+      ||
+      !cssGradients.length
+    )
+  ) {
+
+    cssGradients.push(
+      `url("${paint.image_url}")`
+    );
+
+  }
+
+
+  if (cssGradients.length) {
+
+    preview.style.backgroundImage =
+      cssGradients.join(", ");
+
+    preview.style.backgroundSize =
+      gradients
+        .map(
+          g =>
+            g.size
+              ? `${g.size[0] || 1}px ${g.size[1] || 1}px`
+              : "cover"
+        )
+        .join(", ");
+
+    preview.style.backgroundRepeat =
+      gradients
+        .map(
+          g =>
+            g.repeat
+              ? "repeat"
+              : "no-repeat"
+        )
+        .join(", ");
+
+
+    
+
+    preview.style.backgroundClip =
+      "text";
+
+    preview.style.webkitBackgroundClip =
+      "text";
+
+    preview.style.color =
+      "transparent";
+
+    preview.style.webkitTextFillColor =
+      "transparent";
+
+  } else {
+
+    if (paint.color !== undefined) {
+
+      const color =
+        sevenTVColorToCSS(
+          paint.color
+        );
+
+      preview.style.backgroundImage =
+        "";
+
+      preview.style.color =
+        color;
+
+      preview.style.webkitTextFillColor =
+        color;
+
+    }
+
+  }
+
+
+ 
+
+  if (paint.text) {
+
+    if (
+      paint.text.weight
+    ) {
+
+      preview.style.fontWeight =
+        Number(
+          paint.text.weight
+        ) * 100;
+
+    }
+
+
+    if (
+      paint.text.transform
+    ) {
+
+      preview.style.textTransform =
+        paint.text.transform;
+
+    }
+
+
+    if (
+      paint.text.stroke
+    ) {
+
+      const stroke =
+        paint.text.stroke;
+
+
+      preview.style.webkitTextStroke =
+        `${stroke.width || 0}px ` +
+        sevenTVColorToCSS(
+          stroke.color
+        );
+
+    }
+
+
+    if (
+      paint.text.shadows
+    ) {
+
+      preview.style.textShadow =
+        paint.text.shadows
+          .map(shadow => {
+
+            return (
+              `${shadow.x_offset || 0}px ` +
+              `${shadow.y_offset || 0}px ` +
+              `${shadow.radius || 0}px ` +
+              `${sevenTVColorToCSS(
+                shadow.color
+              )}`
+            );
+
+          })
+          .join(", ");
+
+    }
+
+  }
+
+
+  
+
+  if (
+    paint.shadows &&
+    paint.shadows.length
+  ) {
+
+    preview.style.filter =
+      paint.shadows
+        .map(shadow => {
+
+          return (
+            `drop-shadow(` +
+            `${shadow.x_offset || 0}px ` +
+            `${shadow.y_offset || 0}px ` +
+            `${shadow.radius || 0}px ` +
+            `${sevenTVColorToCSS(
+              shadow.color
+            )})`
+          );
+
+        })
+        .join(" ");
+
+  }
+
+
+  status.textContent =
+    "✅ 7TV Paint loaded";
+
+  status.className =
+    "paint-status success";
+
+}
+
+
+
+
+async function load7TVPaint() {
+
+  const value =
+    document.getElementById(
+      "paint"
+    ).value.trim();
+
+
+  const id =
+    extractPaintId(value);
+
+
+  const status =
+    document.getElementById(
+      "paintStatus"
+    );
+
+
+  if (!id) {
+
+    applyPaint(null);
+
+    return;
+
+  }
+
+
+  status.textContent =
+    "Loading 7TV Paint...";
+
+  status.className =
+    "paint-status";
+
+
+  try {
+
+   
+
+    const response =
+      await fetch(
+        `https://7tv.io/v3/cosmetics/paint/${encodeURIComponent(id)}`
+      );
+
+
+    if (
+      response.ok
+    ) {
+
+      const paint =
+        await response.json();
+
+
+      applyPaint(paint);
+
+      return;
+
+    }
+
+
+    
+
+    const allResponse =
+      await fetch(
+        "https://7tv.io/v3/cosmetics"
+      );
+
+
+    if (
+      allResponse.ok
+    ) {
+
+      const all =
+        await allResponse.json();
+
+
+      const paints =
+        all.paints || [];
+
+
+      const found =
+        paints.find(
+          paint =>
+            String(
+              paint.id
+            ) === String(id)
+        );
+
+
+      if (found) {
+
+        applyPaint(found);
+
+        return;
+
+      }
+
+    }
+
+
+    throw new Error(
+      "Paint not found"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "7TV paint error:",
+      error
+    );
+
+
+    
+
+    applyPaint(null);
+
+
+    status.textContent =
+      "⚠️ Could not load that 7TV Paint";
+
+    status.className =
+      "paint-status error";
+
+  }
+
+}
+
+
+
+
+let paintLoadTimer = null;
+
+
+function updatePreview() {
+
+  const preview =
+    document.getElementById(
+      "timerPreview"
+    );
+
+
+  const font =
+    document.getElementById(
+      "font"
+    ).value.trim();
+
+
+  const size =
+    Number(
+      document.getElementById(
+        "size"
+      ).value
+    ) || 150;
+
+
+  const time =
+    document.getElementById(
+      "time"
+    ).value;
+
+
+  
+
+  if (font) {
+
+    preview.style.fontFamily =
+      `"${font}", Arial, sans-serif`;
+
+  }
+
+
+  
+
+  preview.style.fontSize =
+    `${size}px`;
+
+
+  
+
+  previewSeconds =
+    Math.max(
+      0,
+      parseTime(time) / 1000
+    );
+
+
+  preview.textContent =
+    formatPreviewTime(
+      previewSeconds
+    );
+
+
+ 
+
+  clearTimeout(
+    paintLoadTimer
+  );
+
+
+  paintLoadTimer =
+    setTimeout(
+      load7TVPaint,
+      350
+    );
+
+}
+
+
+
+
+function formatPreviewTime(
+  totalSeconds
+) {
+
+  totalSeconds =
+    Math.max(
+      0,
+      Math.floor(
+        totalSeconds
+      )
+    );
+
+
+  const minutes =
+    Math.floor(
+      totalSeconds / 60
+    );
+
+
+  const seconds =
+    totalSeconds % 60;
+
+
+  return (
+    String(minutes)
+      .padStart(2,"0") +
+    ":" +
+    String(seconds)
+      .padStart(2,"0")
+  );
+
+}
+
+
+
+
+function syncPreviewFromTimer() {
+
+  const remaining =
+    getCurrentRemaining();
+
+
+  previewSeconds =
+    remaining / 1000;
+
+
+  const preview =
+    document.getElementById(
+      "timerPreview"
+    );
+
+
+  preview.textContent =
+    formatPreviewTime(
+      previewSeconds
+    );
+
+}
+
+
+setInterval(
+  syncPreviewFromTimer,
+  250
+);
+
+
+
+
+async function signUp() {
+
+  const email =
+    document.getElementById(
+      "email"
+    ).value.trim();
+
+
+  const password =
+    document.getElementById(
+      "password"
+    ).value;
+
+
+  if (!email || !password) {
+
+    setAuthStatus(
+      "Enter an email and password."
+    );
+
+    return;
+
+  }
+
+
+  if (password.length < 6) {
+
+    setAuthStatus(
+      "Password must be at least 6 characters."
+    );
+
+    return;
+
+  }
+
+
+  setAuthStatus(
+    "Creating account..."
+  );
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signUp({
+
+      email:
+        email,
+
+      password:
+        password
+
+    });
+
+
+  if (error) {
+
+    setAuthStatus(
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  if (!data.session) {
+
+    setAuthStatus(
+      "Account created! Check your email to confirm it, then log in."
+    );
+
+  } else {
+
+    setAuthStatus(
+      "Account created!"
+    );
+
+  }
+
+}
+
+
+async function signIn() {
+
+  const email =
+    document.getElementById(
+      "email"
+    ).value.trim();
+
+
+  const password =
+    document.getElementById(
+      "password"
+    ).value;
+
+
+  if (!email || !password) {
+
+    setAuthStatus(
+      "Enter an email and password."
+    );
+
+    return;
+
+  }
+
+
+  setAuthStatus(
+    "Logging in..."
+  );
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth
+      .signInWithPassword({
+
+        email:
+          email,
+
+        password:
+          password
+
+      });
+
+
+  if (error) {
+
+    setAuthStatus(
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  setAuthStatus(
+    "Logged in!"
+  );
+
+}
+
+
+async function signOut() {
+
+  await supabaseClient.auth.signOut();
+
+}
+
+
+function setAuthStatus(
+  message
+) {
+
+  document.getElementById(
+    "authStatus"
+  ).textContent =
+    message;
+
+}
+
+
+async function updateAuthUI() {
+
+  const {
+    data: {
+      user
+    }
+  } =
+    await supabaseClient.auth.getUser();
+
+
+  const loggedIn =
+    !!user;
+
+
+  const buttons = [
+
+    "startButton",
+    "pauseButton",
+    "addButton",
+    "removeButton",
+    "resetButton",
+    "exactButton"
+
+  ];
+
+
+  buttons.forEach(
+    id => {
+
+      document.getElementById(
+        id
+      ).disabled =
+        !loggedIn;
+
+    }
+  );
+
+
+  const logout =
+    document.getElementById(
+      "logoutButton"
+    );
+
+
+  const info =
+    document.getElementById(
+      "userInfo"
+    );
+
+
+  if (loggedIn) {
+
+    logout.style.display =
+      "inline-block";
+
+    info.style.display =
+      "block";
+
+    info.textContent =
+      "Logged in as: " +
+      user.email;
+
+    setAuthStatus(
+      "✅ Controller unlocked"
+    );
+
+    document.getElementById(
+      "status"
+    ).textContent =
+      "Timer controls ready";
+
+  } else {
+
+    logout.style.display =
+      "none";
+
+    info.style.display =
+      "none";
+
+    setAuthStatus(
+      "Not logged in"
+    );
+
+    document.getElementById(
+      "status"
+    ).textContent =
+      "Login to control the timer";
+
+  }
+
+}
+
+
+supabaseClient.auth.onAuthStateChange(
+  () => {
+
+    updateAuthUI();
+
+  }
+);
+
+
 
 
 function getCurrentRemaining() {
 
   if (!timerState.running) {
-    return Number(timerState.remaining_ms);
+
+    return Number(
+      timerState.remaining_ms
+    );
+
   }
 
+
   const updated =
-    new Date(timerState.updated_at).getTime();
+    new Date(
+      timerState.updated_at
+    ).getTime();
+
 
   const elapsed =
-    Date.now() - updated;
+    Date.now() -
+    updated;
+
 
   return Math.max(
+
     0,
-    Number(timerState.remaining_ms) - elapsed
+
+    Number(
+      timerState.remaining_ms
+    ) -
+    elapsed
+
   );
+
 }
 
 
-async function saveTimer(remaining, running) {
+async function saveTimer(
+  remaining,
+  running
+) {
+
+  const {
+    data: {
+      user
+    }
+  } =
+    await supabaseClient.auth.getUser();
+
+
+  if (!user) {
+
+    setAuthStatus(
+      "You must be logged in to control the timer."
+    );
+
+    return;
+
+  }
+
 
   const row = {
-    id: "main",
-    remaining_ms: Math.max(0, Math.round(remaining)),
-    running: running,
-    updated_at: new Date().toISOString()
+
+    id:
+      "main",
+
+    remaining_ms:
+      Math.max(
+        0,
+        Math.round(
+          remaining
+        )
+      ),
+
+    running:
+      running,
+
+    updated_at:
+      new Date().toISOString()
+
   };
 
-  const { error } =
+
+  const {
+    error
+  } =
     await supabaseClient
       .from("timers")
       .upsert(row);
 
+
   if (error) {
+
     console.error(error);
-    document.getElementById("status").textContent =
-      "Supabase error";
+
+    document.getElementById(
+      "status"
+    ).textContent =
+      "Supabase error: " +
+      error.message;
+
+    return;
+
   }
+
+
+  
+
+  timerState =
+    row;
+
+
+  syncPreviewFromTimer();
+
+
+  document.getElementById(
+    "status"
+  ).textContent =
+    running
+      ? "▶ Timer running"
+      : "⏸ Timer paused";
+
 }
 
 
@@ -272,10 +1769,12 @@ async function startTimer() {
   const remaining =
     getCurrentRemaining();
 
+
   await saveTimer(
     remaining,
     true
   );
+
 }
 
 
@@ -284,22 +1783,31 @@ async function pauseTimer() {
   const remaining =
     getCurrentRemaining();
 
+
   await saveTimer(
     remaining,
     false
   );
+
 }
 
 
-async function addTime(amount) {
+async function addTime(
+  amount
+) {
 
   const remaining =
     getCurrentRemaining();
 
+
   await saveTimer(
+
     remaining + amount,
+
     timerState.running
+
   );
+
 }
 
 
@@ -307,158 +1815,344 @@ async function resetTimer() {
 
   const time =
     parseTime(
-      document.getElementById("time").value
+      document.getElementById(
+        "time"
+      ).value
     );
+
 
   await saveTimer(
     time,
     false
   );
+
 }
 
 
 async function setExactTime() {
 
   const value =
-    document.getElementById("exactTime").value;
+    document.getElementById(
+      "exactTime"
+    ).value;
+
 
   const time =
     parseTime(value);
+
 
   await saveTimer(
     time,
     false
   );
+
 }
 
 
-function parseTime(value) {
+function parseTime(
+  value
+) {
 
   const parts =
-    value.split(":").map(Number);
+    String(value || "")
+      .split(":")
+      .map(Number);
 
-  if (parts.length === 2) {
 
-    const minutes = parts[0] || 0;
-    const seconds = parts[1] || 0;
+  if (
+    parts.length === 2
+  ) {
+
+    const minutes =
+      parts[0] || 0;
+
+    const seconds =
+      parts[1] || 0;
+
 
     return (
-      (minutes * 60 + seconds) *
-      1000
-    );
+
+      minutes * 60 +
+
+      seconds
+
+    ) * 1000;
+
   }
 
+
+  if (
+    parts.length === 1 &&
+    Number.isFinite(parts[0])
+  ) {
+
+    return (
+      parts[0] * 1000
+    );
+
+  }
+
+
   return 600000;
+
 }
+
+
+
+
+async function loadTimer() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("timers")
+      .select("*")
+      .eq("id", "main")
+      .single();
+
+
+  if (data) {
+
+    timerState =
+      data;
+
+    syncPreviewFromTimer();
+
+  }
+
+
+  if (error) {
+
+    console.error(
+      error
+    );
+
+  }
+
+}
+
+
+
+
+supabaseClient
+
+  .channel("timer-sync")
+
+  .on(
+
+    "postgres_changes",
+
+    {
+
+      event:
+        "*",
+
+      schema:
+        "public",
+
+      table:
+        "timers",
+
+      filter:
+        "id=eq.main"
+
+    },
+
+    payload => {
+
+      if (payload.new) {
+
+        timerState =
+          payload.new;
+
+        syncPreviewFromTimer();
+
+      }
+
+    }
+
+  )
+
+  .subscribe();
+
+
 
 
 function generateTimer() {
 
   const paint =
-    document.getElementById("paint").value.trim();
+    document.getElementById(
+      "paint"
+    ).value.trim();
+
 
   const font =
-    document.getElementById("font").value.trim();
+    document.getElementById(
+      "font"
+    ).value.trim();
+
 
   const size =
-    document.getElementById("size").value;
+    document.getElementById(
+      "size"
+    ).value;
+
 
   const time =
-    document.getElementById("time").value;
+    document.getElementById(
+      "time"
+    ).value;
+
 
   const base =
-    window.location.href
-      .substring(
-        0,
-        window.location.href.lastIndexOf("/") + 1
-      );
+    window.location.href.substring(
+
+      0,
+
+      window.location.href.lastIndexOf(
+        "/"
+      ) + 1
+
+    );
+
 
   const url =
+
     base +
+
     "overlay.html" +
+
     "?paint=" +
-    encodeURIComponent(paint) +
+    encodeURIComponent(
+      paint
+    ) +
+
     "&font=" +
-    encodeURIComponent(font) +
+    encodeURIComponent(
+      font
+    ) +
+
     "&size=" +
-    encodeURIComponent(size) +
+    encodeURIComponent(
+      size
+    ) +
+
     "&start=" +
-    encodeURIComponent(time) +
+    encodeURIComponent(
+      time
+    ) +
+
     "&room=main" +
+
     "&v=" +
     Date.now();
 
-  document.getElementById("obsUrl").value = url;
 
-  document.getElementById("output").style.display =
+  document.getElementById(
+    "obsUrl"
+  ).value =
+    url;
+
+
+  document.getElementById(
+    "output"
+  ).style.display =
     "block";
+
 }
 
 
 function copyUrl() {
 
   const input =
-    document.getElementById("obsUrl");
+    document.getElementById(
+      "obsUrl"
+    );
+
 
   navigator.clipboard.writeText(
     input.value
-  );
+  ).then(() => {
+
+    const old =
+      input.value;
+
+
+    input.value =
+      "Copied!";
+
+
+    setTimeout(
+      () => {
+
+        input.value =
+          old;
+
+      },
+      800
+    );
+
+  });
+
 }
 
 
-supabaseClient
-  .from("timers")
-  .select("*")
-  .eq("id", "main")
-  .single()
-  .then(({ data, error }) => {
-
-    if (data) {
-      timerState = data;
-    }
-
-    document.getElementById("status").textContent =
-      "Connected";
-  });
 
 
-supabaseClient
-  .channel("timer-sync")
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "timers",
-      filter: "id=eq.main"
-    },
-    payload => {
+setInterval(
 
-      if (payload.new) {
-        timerState = payload.new;
+  async () => {
+
+    const remaining =
+      getCurrentRemaining();
+
+
+    if (
+
+      timerState.running &&
+
+      remaining <= 0
+
+    ) {
+
+      const {
+        data: {
+          user
+        }
+      } =
+        await supabaseClient.auth.getUser();
+
+
+      if (user) {
+
+        await saveTimer(
+          0,
+          false
+        );
+
       }
 
     }
-  )
-  .subscribe();
+
+  },
+
+  500
+
+);
 
 
-setInterval(() => {
 
-  const remaining =
-    getCurrentRemaining();
 
-  if (
-    timerState.running &&
-    remaining <= 0
-  ) {
+loadTimer();
 
-    saveTimer(0, false);
-  }
+updateAuthUI();
 
-}, 500);
+updatePreview();
 
 </script>
 
 </body>
 </html>
+```
