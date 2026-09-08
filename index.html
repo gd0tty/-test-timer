@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -200,8 +201,6 @@ input::placeholder {
 <div class="container">
 
     <div class="grid">
-        
-
 
         <div class="card">
 
@@ -307,9 +306,6 @@ input::placeholder {
 
         </div>
 
-
-
-
         <div class="card">
 
             <h2>Live Preview</h2>
@@ -339,6 +335,115 @@ input::placeholder {
 <script>
 
 
+const SEVENTV_API =
+    "https://7tv.io/v4/gql";
+
+
+
+
+const PAINT_QUERY = `
+query {
+    paints {
+        paints {
+            id
+            name
+
+            data {
+                layers {
+                    id
+                    opacity
+
+                    ty {
+
+                        __typename
+
+                        ... on PaintLayerTypeSingleColor {
+
+                            color {
+                                r
+                                g
+                                b
+                                a
+                                hex
+                            }
+
+                        }
+
+                        ... on PaintLayerTypeLinearGradient {
+
+                            angle
+                            repeating
+
+                            stops {
+                                at
+
+                                color {
+                                    r
+                                    g
+                                    b
+                                    a
+                                    hex
+                                }
+                            }
+
+                        }
+
+                        ... on PaintLayerTypeRadialGradient {
+
+                            repeating
+                            shape
+
+                            stops {
+                                at
+
+                                color {
+                                    r
+                                    g
+                                    b
+                                    a
+                                    hex
+                                }
+                            }
+
+                        }
+
+                        ... on PaintLayerTypeImage {
+
+                            images {
+                                url
+                                width
+                                height
+                                mime
+                            }
+
+                        }
+
+                    }
+                }
+
+                shadows {
+
+                    blur
+                    offsetX
+                    offsetY
+
+                    color {
+                        r
+                        g
+                        b
+                        a
+                        hex
+                    }
+
+                }
+            }
+        }
+    }
+}
+`;
+
+
+
 const timer =
     document.getElementById("timer");
 
@@ -355,32 +460,640 @@ const sizeInput =
     document.getElementById("fontSize");
 
 
-function updatePreview() {
 
-    const url =
-        paintInput.value.trim();
 
-    if (!url) {
+function extractPaintId(value) {
 
-        timer.style.backgroundImage = "none";
+    value =
+        String(value || "").trim();
 
-        timer.style.color = "white";
-
-        timer.style.webkitTextFillColor = "white";
-
-        return;
+    if (!value) {
+        return "";
     }
 
+   
+
+    if (
+        /^[A-Za-z0-9]+$/.test(value)
+    ) {
+        return value;
+    }
+
+
+  
+
+    try {
+
+        const url =
+            new URL(value);
+
+        const parts =
+            url.pathname
+                .split("/")
+                .filter(Boolean);
+
+        if (parts.length) {
+
+            const last =
+                parts[parts.length - 1];
+
+            if (
+                /^[A-Za-z0-9]+$/.test(last)
+            ) {
+                return last;
+            }
+
+        }
+
+    } catch (error) {
+
+        
+
+    }
+
+    return value;
+}
+
+
+
+function colorToRGBA(color, opacity = 1) {
+
+    if (!color) {
+
+        return "rgba(255,255,255,1)";
+
+    }
+
+
+    const alpha =
+        typeof color.a === "number"
+            ? color.a / 255
+            : 1;
+
+    const finalAlpha =
+        Math.max(
+            0,
+            Math.min(
+                1,
+                alpha * opacity
+            )
+        );
+
+    return (
+        "rgba(" +
+        (color.r || 0) +
+        "," +
+        (color.g || 0) +
+        "," +
+        (color.b || 0) +
+        "," +
+        finalAlpha +
+        ")"
+    );
+}
+
+
+
+function convertPaintLayer(layer) {
+
+    if (!layer || !layer.ty) {
+        return null;
+    }
+
+    const type =
+        layer.ty;
+
+    const opacity =
+        typeof layer.opacity === "number"
+            ? layer.opacity
+            : 1;
+
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeSingleColor"
+    ) {
+
+        const color =
+            colorToRGBA(
+                type.color,
+                opacity
+            );
+
+        return {
+            image:
+                `linear-gradient(${color},${color})`,
+
+            size:
+                "100% 100%",
+
+            repeat:
+                "no-repeat"
+        };
+
+    }
+
+
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeLinearGradient"
+    ) {
+
+        const stops =
+            (type.stops || [])
+                .map(stop => {
+
+                    const color =
+                        colorToRGBA(
+                            stop.color,
+                            opacity
+                        );
+
+                    const position =
+                        (stop.at * 100);
+
+                    return (
+                        color +
+                        " " +
+                        position +
+                        "%"
+                    );
+
+                })
+                .join(",");
+
+
+        const functionName =
+            type.repeating
+                ? "repeating-linear-gradient"
+                : "linear-gradient";
+
+
+        return {
+
+            image:
+                `${functionName}(` +
+                `${type.angle || 0}deg,` +
+                `${stops})`,
+
+            size:
+                "100% 100%",
+
+            repeat:
+                "no-repeat"
+
+        };
+
+    }
+
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeRadialGradient"
+    ) {
+
+        const stops =
+            (type.stops || [])
+                .map(stop => {
+
+                    const color =
+                        colorToRGBA(
+                            stop.color,
+                            opacity
+                        );
+
+                    return (
+                        color +
+                        " " +
+                        (stop.at * 100) +
+                        "%"
+                    );
+
+                })
+                .join(",");
+
+
+        const functionName =
+            type.repeating
+                ? "repeating-radial-gradient"
+                : "radial-gradient";
+
+
+        const shape =
+            type.shape === "ELLIPSE"
+                ? "ellipse"
+                : "circle";
+
+
+        return {
+
+            image:
+                `${functionName}(` +
+                `${shape},` +
+                `${stops})`,
+
+            size:
+                "100% 100%",
+
+            repeat:
+                "no-repeat"
+
+        };
+
+    }
+
+
+
+
+    if (
+        type.__typename ===
+        "PaintLayerTypeImage"
+    ) {
+
+        const image =
+            type.images &&
+            type.images.length
+                ? type.images[0]
+                : null;
+
+
+        if (!image) {
+            return null;
+        }
+
+
+        return {
+
+            image:
+                `url("${image.url}")`,
+
+            size:
+                "cover",
+
+            repeat:
+                "no-repeat"
+
+        };
+
+    }
+
+
+    return null;
+}
+
+
+
+
+function applyPaint(paint) {
+
+    if (
+        !paint ||
+        !paint.data
+    ) {
+
+        return;
+
+    }
+
+
+    const layers =
+        paint.data.layers || [];
+
+
+   
+
+    const rendered =
+        layers
+            .map(convertPaintLayer)
+            .filter(Boolean);
+
+
+    if (!rendered.length) {
+
+        timer.style.backgroundImage =
+            "none";
+
+        timer.style.color =
+            "white";
+
+        timer.style.webkitTextFillColor =
+            "white";
+
+        return;
+
+    }
+
+
     timer.style.backgroundImage =
-        `url("${url}")`;
+        rendered
+            .map(layer => layer.image)
+            .join(",");
+
+
+    timer.style.backgroundSize =
+        rendered
+            .map(layer => layer.size)
+            .join(",");
+
+
+    timer.style.backgroundRepeat =
+        rendered
+            .map(layer => layer.repeat)
+            .join(",");
+
+
+    timer.style.backgroundPosition =
+        rendered
+            .map(() => "center")
+            .join(",");
+
+
+   
 
     timer.style.color =
         "transparent";
 
     timer.style.webkitTextFillColor =
         "transparent";
+
+
+ 
+
+    const shadows =
+        paint.data.shadows || [];
+
+
+    if (shadows.length) {
+
+        timer.style.filter =
+            shadows
+                .map(shadow => {
+
+                    return (
+                        "drop-shadow(" +
+                        (shadow.offsetX || 0) +
+                        "px " +
+                        (shadow.offsetY || 0) +
+                        "px " +
+                        (shadow.blur || 0) +
+                        "px " +
+                        colorToRGBA(shadow.color) +
+                        ")"
+                    );
+
+                })
+                .join(" ");
+
+    } else {
+
+        timer.style.filter =
+            "none";
+
+    }
+
 }
 
+
+
+
+let paintRequestNumber = 0;
+
+let paintCache =
+    new Map();
+
+
+async function getPaint(paintId) {
+
+    paintId =
+        extractPaintId(paintId);
+
+
+    if (!paintId) {
+
+        throw new Error(
+            "No Paint ID entered."
+        );
+
+    }
+
+
+ 
+    if (
+        paintCache.has(paintId)
+    ) {
+
+        return paintCache.get(
+            paintId
+        );
+
+    }
+
+
+    const response =
+        await fetch(
+            SEVENTV_API,
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json",
+
+                    "Accept":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify({
+
+                        query:
+                            PAINT_QUERY
+
+                    })
+
+            }
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "7TV API returned HTTP " +
+            response.status
+        );
+
+    }
+
+
+    const result =
+        await response.json();
+
+
+    if (
+        result.errors &&
+        result.errors.length
+    ) {
+
+        throw new Error(
+            result.errors
+                .map(error =>
+                    error.message
+                )
+                .join(", ")
+        );
+
+    }
+
+
+    const paints =
+        result &&
+        result.data &&
+        result.data.paints &&
+        result.data.paints.paints
+            ? result.data.paints.paints
+            : [];
+
+
+    const wanted =
+        String(paintId)
+            .toLowerCase();
+
+
+    const paint =
+        paints.find(
+            item =>
+                String(item.id)
+                    .toLowerCase() === wanted
+        );
+
+
+    if (!paint) {
+
+        throw new Error(
+            "Could not find that 7TV Paint ID."
+        );
+
+    }
+
+
+    paintCache.set(
+        paintId,
+        paint
+    );
+
+
+    return paint;
+}
+
+
+
+async function updatePreview() {
+
+    const value =
+        paintInput.value.trim();
+
+
+
+    if (!value) {
+
+        timer.style.backgroundImage =
+            "none";
+
+        timer.style.color =
+            "white";
+
+        timer.style.webkitTextFillColor =
+            "white";
+
+        timer.style.filter =
+            "none";
+
+        return;
+
+    }
+
+
+    const paintId =
+        extractPaintId(value);
+
+
+    const request =
+        ++paintRequestNumber;
+
+
+   
+    timer.style.color =
+        "white";
+
+    timer.style.webkitTextFillColor =
+        "white";
+
+
+    try {
+
+        const paint =
+            await getPaint(
+                paintId
+            );
+
+
+     
+
+        if (
+            request !==
+            paintRequestNumber
+        ) {
+
+            return;
+
+        }
+
+
+        applyPaint(
+            paint
+        );
+
+
+    } catch (error) {
+
+        if (
+            request !==
+            paintRequestNumber
+        ) {
+
+            return;
+
+        }
+
+
+        console.error(
+            "7TV Paint error:",
+            error
+        );
+
+
+        timer.style.backgroundImage =
+            "none";
+
+        timer.style.color =
+            "white";
+
+        timer.style.webkitTextFillColor =
+            "white";
+
+        timer.style.filter =
+            "none";
+
+    }
+
+}
 
 
 
@@ -389,17 +1102,28 @@ function updateFont() {
     const font =
         fontInput.value.trim();
 
-    if (!font) return;
+
+    if (!font) {
+        return;
+    }
+
 
     const old =
-        document.getElementById("googleFont");
+        document.getElementById(
+            "googleFont"
+        );
+
 
     if (old) {
         old.remove();
     }
 
+
     const link =
-        document.createElement("link");
+        document.createElement(
+            "link"
+        );
+
 
     link.id =
         "googleFont";
@@ -407,12 +1131,17 @@ function updateFont() {
     link.rel =
         "stylesheet";
 
+
     link.href =
         "https://fonts.googleapis.com/css2?family=" +
         font.replace(/\s+/g, "+") +
         ":wght@100;200;300;400;500;600;700;800;900&display=swap";
 
-    document.head.appendChild(link);
+
+    document.head.appendChild(
+        link
+    );
+
 
     timer.style.fontFamily =
         `"${font}", sans-serif`;
@@ -425,18 +1154,25 @@ function updateSize() {
     const size =
         sizeInput.value || 120;
 
+
     timer.style.fontSize =
         size + "px";
 }
 
 
 
+
 function parseTime(value) {
 
     const parts =
-        value.split(":").map(Number);
+        value
+            .split(":")
+            .map(Number);
 
-    if (parts.length === 2) {
+
+    if (
+        parts.length === 2
+    ) {
 
         return (
             (parts[0] * 60) +
@@ -445,7 +1181,10 @@ function parseTime(value) {
 
     }
 
-    if (parts.length === 3) {
+
+    if (
+        parts.length === 3
+    ) {
 
         return (
             (parts[0] * 3600) +
@@ -455,49 +1194,72 @@ function parseTime(value) {
 
     }
 
+
     return 0;
 }
+
+
 
 
 function formatTime(seconds) {
 
     seconds =
-        Math.max(0, Math.floor(seconds));
+        Math.max(
+            0,
+            Math.floor(seconds)
+        );
+
 
     const hours =
-        Math.floor(seconds / 3600);
+        Math.floor(
+            seconds / 3600
+        );
+
 
     const minutes =
-        Math.floor((seconds % 3600) / 60);
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
 
     const secs =
         seconds % 60;
 
 
-    if (hours > 0) {
+    if (
+        hours > 0
+    ) {
 
         return (
-            String(hours).padStart(2, "0") +
+            String(hours)
+                .padStart(2, "0") +
             ":" +
-            String(minutes).padStart(2, "0") +
+            String(minutes)
+                .padStart(2, "0") +
             ":" +
-            String(secs).padStart(2, "0")
+            String(secs)
+                .padStart(2, "0")
         );
 
     }
 
+
     return (
-        String(minutes).padStart(2, "0") +
+        String(minutes)
+            .padStart(2, "0") +
         ":" +
-        String(secs).padStart(2, "0")
+        String(secs)
+            .padStart(2, "0")
     );
 }
 
 
 
-
 let remaining =
-    parseTime(startInput.value);
+    parseTime(
+        startInput.value
+    );
+
 
 let lastTime =
     performance.now();
@@ -506,13 +1268,19 @@ let lastTime =
 function resetPreviewTime() {
 
     remaining =
-        parseTime(startInput.value);
+        parseTime(
+            startInput.value
+        );
+
 
     lastTime =
         performance.now();
 
+
     timer.textContent =
-        formatTime(remaining);
+        formatTime(
+            remaining
+        );
 }
 
 
@@ -521,29 +1289,45 @@ function runTimer() {
     const now =
         performance.now();
 
+
     const delta =
-        (now - lastTime) / 1000;
+        (now - lastTime) /
+        1000;
+
 
     lastTime =
         now;
 
 
-    if (remaining > 0) {
+    if (
+        remaining > 0
+    ) {
 
-        remaining -= delta;
+        remaining -=
+            delta;
 
-        if (remaining < 0) {
-            remaining = 0;
+
+        if (
+            remaining < 0
+        ) {
+
+            remaining =
+                0;
+
         }
 
     }
 
 
     timer.textContent =
-        formatTime(remaining);
+        formatTime(
+            remaining
+        );
 
 
-    requestAnimationFrame(runTimer);
+    requestAnimationFrame(
+        runTimer
+    );
 }
 
 
@@ -557,6 +1341,7 @@ function generateTimer() {
     const paint =
         paintInput.value.trim();
 
+
     if (!paint) {
 
         alert(
@@ -564,14 +1349,17 @@ function generateTimer() {
         );
 
         return;
+
     }
 
 
     const font =
         fontInput.value.trim();
 
+
     const start =
         startInput.value.trim();
+
 
     const size =
         sizeInput.value;
@@ -608,7 +1396,7 @@ function generateTimer() {
     );
 
 
-    /* Cache bust */
+ 
 
     overlay.searchParams.set(
         "v",
@@ -628,11 +1416,15 @@ function generateTimer() {
         "block";
 }
 
-    
+
+
+
 function copyUrl() {
 
     const input =
-        document.getElementById("obsUrl");
+        document.getElementById(
+            "obsUrl"
+        );
 
 
     navigator.clipboard.writeText(
@@ -641,7 +1433,9 @@ function copyUrl() {
 
 
     const success =
-        document.getElementById("success");
+        document.getElementById(
+            "success"
+        );
 
 
     success.style.display =
@@ -660,9 +1454,11 @@ function copyUrl() {
 
 
 updateFont();
+
 updateSize();
 
 </script>
 
 </body>
 </html>
+```
